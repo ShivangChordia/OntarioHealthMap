@@ -30,7 +30,7 @@ const HealthMap = () => {
   const [geoJsonKey, setGeoJsonKey] = useState(0); // ✅ Key to re-render GeoJSON
 
   const navigate = useNavigate(); // ✅ Initialize navigation hook
-
+  const API_BASE_URL = "https://ontario-health-map-backend.vercel.app";
   const handleDetailedAnalysis = () => {
     navigate("/analysis", { state: { selectedRegion, selectedCancerType } });
   };
@@ -38,7 +38,7 @@ const HealthMap = () => {
   // ✅ Fetch available cancer types when "Cancer" is selected
   useEffect(() => {
     if (selectedDisease === "Cancer") {
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/cancer-types`)
+      fetch(`${API_BASE_URL}/api/cancer-types`)
         .then((response) => response.json())
         .then((data) => {
           console.log("✅ Fetched Cancer Types:", data);
@@ -54,11 +54,7 @@ const HealthMap = () => {
   useEffect(() => {
     if (!selectedCancerType) return;
 
-    fetch(
-      `${
-        import.meta.env.VITE_BACKEND_URL
-      }/api/available-years?type=${selectedCancerType}`
-    )
+    fetch(`${API_BASE_URL}/api/available-years?type=${selectedCancerType}`)
       .then((response) => response.json())
       .then((years) => {
         console.log("✅ Available Years:", years);
@@ -83,7 +79,7 @@ const HealthMap = () => {
 
   // ✅ Fetch PHU Data
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/phu-data`)
+    fetch(`${API_BASE_URL}/api/phu-data`)
       .then((response) => response.json())
       .then((data) => {
         console.log("✅ Fetched PHU Data");
@@ -114,7 +110,7 @@ const HealthMap = () => {
   // ✅ Fetch available cancer types when "Cancer" is selected
   useEffect(() => {
     if (selectedDisease === "Cancer") {
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/cancer-types`)
+      fetch(`${API_BASE_URL}/api/cancer-types`)
         .then((response) => response.json())
         .then((data) => {
           console.log("✅ Fetched Cancer Types:", data);
@@ -130,11 +126,7 @@ const HealthMap = () => {
   useEffect(() => {
     if (!selectedCancerType) return;
 
-    fetch(
-      `${
-        import.meta.env.VITE_BACKEND_URL
-      }/api/available-years?type=${selectedCancerType}`
-    )
+    fetch(`${API_BASE_URL}/api/available-years?type=${selectedCancerType}`)
       .then((response) => response.json())
       .then((years) => {
         console.log("✅ Available Years:", years);
@@ -148,9 +140,7 @@ const HealthMap = () => {
   useEffect(() => {
     if (!selectedCancerType) return;
 
-    let apiUrl = `${
-      import.meta.env.VITE_BACKEND_URL
-    }/api/cancer-data?type=${selectedCancerType}&year=${selectedYear}&age=${selectedAge}&gender=${selectedGender}`;
+    let apiUrl = `${API_BASE_URL}/api/cancer-data?type=${selectedCancerType}&year=${selectedYear}&age=${selectedAge}&gender=${selectedGender}`;
 
     fetch(apiUrl)
       .then((response) => response.json())
