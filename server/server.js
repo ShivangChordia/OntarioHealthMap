@@ -155,148 +155,101 @@ app.get("/api/cancer-data", async (req, res) => {
       return res.status(400).json({ error: "Cancer type is required" });
     }
 
-    const incidenceTable = `cancer_incidence_${type.toLowerCase()}`;
-    const mortalityTable = `cancer_mortality_${type.toLowerCase()}`;
+    const tableName = `cancer_incidence_${type.toLowerCase()}`;
 
-    // ✅ Verify Tables Exist
-    const tablesExist = await pool.query(
+    // ✅ Check if the table exists (Security Measure)
+    const tableExists = await pool.query(
       `SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
-        WHERE table_name IN ($1, $2)
+        WHERE table_name = $1
       )`,
-      [incidenceTable, mortalityTable]
+      [tableName]
     );
 
-    if (!tablesExist.rows[0].exists) {
+    if (!tableExists.rows[0].exists) {
       return res.status(400).json({ error: "Invalid cancer type" });
     }
 
     // ✅ Construct Measure Query Based on Filters
-    let measureFilter = "Age-standardized rate (both sexes)";
+    let measureFilter = "Age-standardized rate (both sexes)"; // Default if no filters
     if (age) {
-      measureFilter = `Age-specific rate (${age.replace("-", " to ")})`;
+      measureFilter = `Age-specific rate (${age.replace("-", " to ")})`; // Convert "50-64" -> "50 to 64"
     } else if (gender) {
-      measureFilter = `Age-standardized rate (${gender.toLowerCase()}s)`;
+      measureFilter = `Age-standardized rate (${gender.toLowerCase()}s)`; // Convert "male" -> "males"
     }
 
-    // ✅ Query for Cancer Incidence
-    let queryIncidence = `
-      SELECT 'incidence' AS data_type, * 
-      FROM ${incidenceTable} 
-      WHERE year = COALESCE($1, (SELECT MAX(year) FROM ${incidenceTable}))
-    `;
-    let values = [year || null];
+    // ✅ Dynamic Query & Parameter Handling
+    let query = `SELECT * FROM ${tableName} WHERE year = COALESCE($1, (SELECT MAX(year) FROM ${tableName}))`;
+    let values = [year || null]; // Default: Most recent year
 
-    queryIncidence += ` AND measure ILIKE $${values.length + 1}`;
+    // ✅ Add Measure Filter
+    query += ` AND measure ILIKE $${values.length + 1}`;
     values.push(`%${measureFilter}%`);
 
-    // ✅ Query for Cancer Mortality
-    let queryMortality = `
-      SELECT 'mortality' AS data_type, * 
-      FROM ${mortalityTable} 
-      WHERE year = COALESCE($1, (SELECT MAX(year) FROM ${mortalityTable}))
-    `;
+    query += ` ORDER BY geography, year DESC`;
 
-    queryMortality += ` AND measure ILIKE $${values.length + 1}`;
+    console.log("📝 Query:", query);
+    console.log("📊 Values:", values);
 
-    // ✅ Execute Queries
-    const [incidenceResult, mortalityResult] = await Promise.all([
-      pool.query(queryIncidence, values),
-      pool.query(queryMortality, values),
-    ]);
-
-    // ✅ Combine Results
-    res.json({
-      incidence: incidenceResult.rows,
-      mortality: mortalityResult.rows,
-    });
+    // ✅ Execute Query
+    const result = await pool.query(query, values);
+    res.json(result.rows);
   } catch (err) {
     console.error("❌ Database Error (Fetching Cancer Data):", err);
     res.status(500).json({ error: "Database error" });
   }
 });
 
-/**
- * ✅ Get Chronic Disease Incidence, Prevalence & Mortality Data
- * URL: /api/chronic-data?type=asthma&year=2015&gender=male&age=50-64
- */
 app.get("/api/chronic-data", async (req, res) => {
   try {
     const { type, year, gender, age } = req.query;
 
+    // ❌ Return error if type is missing
     if (!type) {
-      return res.status(400).json({ error: "Chronic disease type is required" });
+      return res.status(400).json({ error: "Chronic type is required" });
     }
 
-    const incidenceTable = `chronic_incidence_${type.toLowerCase()}`;
-    const prevalenceTable = `chronic_prevalence_${type.toLowerCase()}`;
-    const mortalityTable = `chronic_mortality_${type.toLowerCase()}`;
+    const tableName = `chronic_incidence_${type.toLowerCase()}`;
 
-    // ✅ Verify Tables Exist
-    const tablesExist = await pool.query(
+    // ✅ Check if the table exists (Security Measure)
+    const tableExists = await pool.query(
       `SELECT EXISTS (
         SELECT 1 FROM information_schema.tables 
-        WHERE table_name IN ($1, $2, $3)
+        WHERE table_name = $1
       )`,
-      [incidenceTable, prevalenceTable, mortalityTable]
+      [tableName]
     );
 
-    if (!tablesExist.rows[0].exists) {
-      return res.status(400).json({ error: "Invalid chronic disease type" });
+    if (!tableExists.rows[0].exists) {
+      return res.status(400).json({ error: "Invalid cancer type" });
     }
 
     // ✅ Construct Measure Query Based on Filters
-    let measureFilter = "Age-standardized rate (both sexes)";
+    let measureFilter = "Age-standardized rate (both sexes)"; // Default if no filters
     if (age) {
-      measureFilter = `Age-specific rate (${age.replace("-", " to ")})`;
+      measureFilter = `Age-specific rate (${age.replace("-", " to ")})`; // Convert "50-64" -> "50 to 64"
     } else if (gender) {
-      measureFilter = `Age-standardized rate (${gender.toLowerCase()}s)`;
+      measureFilter = `Age-standardized rate (${gender.toLowerCase()}s)`; // Convert "male" -> "males"
     }
 
-    // ✅ Query for Chronic Incidence
-    let queryIncidence = `
-      SELECT 'incidence' AS data_type, * 
-      FROM ${incidenceTable} 
-      WHERE year = COALESCE($1, (SELECT MAX(year) FROM ${incidenceTable}))
-    `;
-    let values = [year || null];
+    // ✅ Dynamic Query & Parameter Handling
+    let query = `SELECT * FROM ${tableName} WHERE year = COALESCE($1, (SELECT MAX(year) FROM ${tableName}))`;
+    let values = [year || null]; // Default: Most recent year
 
-    queryIncidence += ` AND measure ILIKE $${values.length + 1}`;
+    // ✅ Add Measure Filter
+    query += ` AND measure ILIKE $${values.length + 1}`;
     values.push(`%${measureFilter}%`);
 
-    // ✅ Query for Chronic Prevalence
-    let queryPrevalence = `
-      SELECT 'prevalence' AS data_type, * 
-      FROM ${prevalenceTable} 
-      WHERE year = COALESCE($1, (SELECT MAX(year) FROM ${prevalenceTable}))
-    `;
+    query += ` ORDER BY geography, year DESC`;
 
-    queryPrevalence += ` AND measure ILIKE $${values.length + 1}`;
+    console.log("📝 Query:", query);
+    console.log("📊 Values:", values);
 
-    // ✅ Query for Chronic Mortality
-    let queryMortality = `
-      SELECT 'mortality' AS data_type, * 
-      FROM ${mortalityTable} 
-      WHERE year = COALESCE($1, (SELECT MAX(year) FROM ${mortalityTable}))
-    `;
-
-    queryMortality += ` AND measure ILIKE $${values.length + 1}`;
-
-    // ✅ Execute Queries
-    const [incidenceResult, prevalenceResult, mortalityResult] = await Promise.all([
-      pool.query(queryIncidence, values),
-      pool.query(queryPrevalence, values),
-      pool.query(queryMortality, values),
-    ]);
-
-    // ✅ Combine Results
-    res.json({
-      incidence: incidenceResult.rows,
-      prevalence: prevalenceResult.rows,
-      mortality: mortalityResult.rows,
-    });
+    // ✅ Execute Query
+    const result = await pool.query(query, values);
+    res.json(result.rows);
   } catch (err) {
-    console.error("❌ Database Error (Fetching Chronic Disease Data):", err);
+    console.error("❌ Database Error (Fetching Cancer Data):", err);
     res.status(500).json({ error: "Database error" });
   }
 });
@@ -317,57 +270,206 @@ app.get("/api/phu-data", async (req, res) => {
 
 app.get("/api/disease-trends", async (req, res) => {
   try {
-    const { region, type } = req.query;
+    const { region, diseaseType, specificType } = req.query;
 
-    if (!region || !type) {
+    if (!region || !diseaseType) {
       return res
         .status(400)
-        .json({ error: "Region and cancer type are required" });
+        .json({ error: "Region and disease type are required" });
     }
 
-    const CancerIncidenceTable = `cancer_incidence_${type.toLowerCase()}`;
-    const CancerMortalityTable = `cancer_mortality_${type.toLowerCase()}`;
+    // Handle backward compatibility (old cancer-specific requests)
+    const type = specificType || req.query.type;
 
-    // ✅ Verify Table Exists
-    const incidenceTableExists = await pool.query(
-      `SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)`,
-      [CancerIncidenceTable]
-    );
-
-    if (!incidenceTableExists.rows[0].exists) {
-      return res.status(400).json({ error: "Invalid cancer type" });
+    if (diseaseType === "Cancer" && !type) {
+      return res.status(400).json({ error: "Cancer type is required" });
     }
 
-    // ✅ Fetch Cancer Incidence Data
-    const incidenceQuery = `
-      SELECT year, rate, cases, ci
-      FROM ${CancerIncidenceTable}
-      WHERE geography ILIKE $1
-      AND measure ILIKE 'Age-standardized rate (both sexes)'
-      ORDER BY year ASC
-    `;
-    const incidenceResult = await pool.query(incidenceQuery, [`%${region}%`]);
+    let primaryTable,
+      secondaryTable,
+      tertiaryTable,
+      primaryQuery,
+      secondaryQuery,
+      tertiaryQuery;
 
-    // ✅ Fetch Cancer Mortality Data
-    const mortalityQuery = `
-      SELECT year, rate, cases, ci
-      FROM ${CancerMortalityTable}
-      WHERE geography ILIKE $1
-      AND measure ILIKE 'Age-standardized rate (both sexes)'
-      ORDER BY year ASC
-    `;
-    const mortalityResult = await pool.query(mortalityQuery, [`%${region}%`]);
+    // Determine tables and queries based on disease type
+    switch (diseaseType) {
+      case "Cancer":
+        primaryTable = `cancer_incidence_${type.toLowerCase()}`;
+        secondaryTable = `cancer_mortality_${type.toLowerCase()}`;
 
+        // Verify primary table exists
+        const incidenceTableExists = await pool.query(
+          `SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)`,
+          [primaryTable]
+        );
+
+        if (!incidenceTableExists.rows[0].exists) {
+          return res.status(400).json({ error: "Invalid cancer type" });
+        }
+
+        // Fetch Incidence Data
+        primaryQuery = `
+          SELECT year, rate, cases, ci
+          FROM ${primaryTable}
+          WHERE geography ILIKE $1
+          AND measure ILIKE 'Age-standardized rate (both sexes)'
+          ORDER BY year ASC
+        `;
+
+        // Fetch Mortality Data
+        secondaryQuery = `
+          SELECT year, rate, cases, ci
+          FROM ${secondaryTable}
+          WHERE geography ILIKE $1
+          AND measure ILIKE 'Age-standardized rate (both sexes)'
+          ORDER BY year ASC
+        `;
+        break;
+
+      case "Chronic":
+        primaryTable = `chronic_incidence_${type.toLowerCase()}`;
+        secondaryTable = `chronic_mortality_${type.toLowerCase()}`;
+        tertiaryTable = `chronic_prevalence_${type.toLowerCase()}`;
+
+        // Verify primary table exists
+        const chronicTableExists = await pool.query(
+          `SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)`,
+          [primaryTable]
+        );
+
+        if (!chronicTableExists.rows[0].exists) {
+          return res
+            .status(400)
+            .json({ error: "Invalid chronic disease type" });
+        }
+
+        // Fetch Prevalence Data
+        primaryQuery = `
+          SELECT year, rate, cases, ci
+          FROM ${primaryTable}
+          WHERE geography ILIKE $1
+          AND measure ILIKE 'Age-standardized rate (both sexes)'
+          ORDER BY year ASC
+        `;
+
+        // Fetch Complications Data
+        secondaryQuery = `
+          SELECT year, rate, count
+          FROM ${secondaryTable}
+          WHERE geography ILIKE $1
+          AND measure ILIKE 'Age-standardized rate (both sexes)'
+          ORDER BY year ASC
+        `;
+
+        // Fetch Complications Data
+        tertiaryQuery = `
+         SELECT year, rate, cases
+         FROM ${tertiaryTable}
+         WHERE geography ILIKE $1
+         AND measure ILIKE 'Age-standardized rate (both sexes)'
+         ORDER BY year ASC
+       `;
+        break;
+
+      case "Smoking":
+        primaryTable = "smoking_rates";
+        secondaryTable = "smoking_health_impacts";
+
+        // Fetch Smoking Rates
+        primaryQuery = `
+          SELECT year, rate, cases as cases, confidence_interval as ci, quitting_rate
+          FROM ${primaryTable}
+          WHERE geography ILIKE $1
+          ORDER BY year ASC
+        `;
+
+        // Fetch Health Impacts
+        secondaryQuery = `
+          SELECT year, rate, cases
+          FROM ${secondaryTable}
+          WHERE geography ILIKE $1
+          ORDER BY year ASC
+        `;
+        break;
+
+      case "Reproductive":
+        primaryTable = "reproductive_health_indicators";
+        secondaryTable = "reproductive_complications";
+
+        // Fetch Reproductive Health Indicators
+        primaryQuery = `
+          SELECT year, rate, cases, confidence_interval as ci
+          FROM ${primaryTable}
+          WHERE geography ILIKE $1
+          ORDER BY year ASC
+        `;
+
+        // Fetch Complications
+        secondaryQuery = `
+          SELECT year, rate, cases
+          FROM ${secondaryTable}
+          WHERE geography ILIKE $1
+          ORDER BY year ASC
+        `;
+        break;
+
+      case "Overall Health":
+        primaryTable = "health_index";
+        secondaryTable = "risk_factors";
+
+        // Fetch Health Index
+        primaryQuery = `
+          SELECT year, index_value as rate, population as cases, confidence_interval as ci
+          FROM ${primaryTable}
+          WHERE geography ILIKE $1
+          ORDER BY year ASC
+        `;
+
+        // Fetch Risk Factors
+        secondaryQuery = `
+          SELECT year, index_value as rate, population as cases
+          FROM ${secondaryTable}
+          WHERE geography ILIKE $1
+          ORDER BY year ASC
+        `;
+        break;
+
+      default:
+        return res.status(400).json({ error: "Invalid disease type" });
+    }
+
+    // Execute queries
+    const primaryResult = await pool.query(primaryQuery, [`%${region}%`]);
+    let secondaryResult = { rows: [] };
+    let tertiaryResult = { rows: [] };
+
+    try {
+      secondaryResult = await pool.query(secondaryQuery, [`%${region}%`]);
+      tertiaryResult = await pool.query(tertiaryQuery, [`%${region}%`]);
+    } catch (error) {
+      console.warn(
+        `Secondary data not available for ${diseaseType} - ${type || ""}`
+      );
+      // Continue without secondary data
+    }
+
+    // Return data in the new format (primary/secondary instead of incidence/mortality)
     res.json({
-      incidence: incidenceResult.rows,
-      mortality: mortalityResult.rows,
+      primary: primaryResult.rows,
+      secondary: secondaryResult.rows,
+      tertiary: tertiaryResult.rows,
     });
   } catch (error) {
-    console.error("❌ Database Error (Fetching Disease Trends):", error);
+    console.error(
+      `❌ Database Error (Fetching ${
+        req.query.diseaseType || "Disease"
+      } Trends):`,
+      error
+    );
     res.status(500).json({ error: "Database error" });
   }
 });
-
 /**
  * ✅ Root Route (Fix "Cannot GET /" Error)
  */
