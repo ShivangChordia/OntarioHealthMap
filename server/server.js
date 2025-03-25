@@ -145,18 +145,88 @@ app.get("/api/cancer-types", async (req, res) => {
 });
 
 /**
- * ✅ Get Cancer Data Dynamically (Filters: Year, Age, Gender)
- * URL: /api/cancer-data?type=lung&year=2015&gender=male&age=50-64
+ * ✅ Get Available Chronic Disease Categories (All Types)
+ * URL: /api/chronic-types
  */
+app.get("/api/chronic-types", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND (table_name LIKE 'chronic_incidence_%' 
+        OR table_name LIKE 'chronic_prevalence_%' 
+        OR table_name LIKE 'chronic_mortality_%')
+    `);
+
+    const types = result.rows.map((row) =>
+      row.table_name.replace(/chronic_(incidence|prevalence|mortality)_/, "")
+    );
+
+    // Remove duplicates (since one disease can have multiple types)
+    const uniqueTypes = [...new Set(types)];
+
+    res.json(uniqueTypes);
+  } catch (err) {
+    console.error("❌ Database Error (Fetching Chronic Disease Types):", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
 /**
- * ✅ Get Cancer Data Dynamically (Filters: Year, Age, Gender)
+ * ✅ Get Available Smoking-Related Disease Categories
+ * URL: /api/smoking-types
+ */
+/* app.get("/api/smoking-types", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND table_name LIKE 'smoking_disease_%'
+    `);
+
+    const types = result.rows.map((row) =>
+      row.table_name.replace("smoking_disease_", "")
+    );
+    res.json(types);
+  } catch (err) {
+    console.error("❌ Database Error (Fetching Smoking Disease Types):", err);
+    res.status(500).json({ error: "Database error" });
+  }
+}); */
+
+/**
+ * ✅ Get Available Reproductive Health Disease Categories
+ * URL: /api/reproductive-health-types
+ */
+/* app.get("/api/reproductive-health-types", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND table_name LIKE 'reproductive_health_%'
+    `);
+
+    const types = result.rows.map((row) =>
+      row.table_name.replace("reproductive_health_", "")
+    );
+    res.json(types);
+  } catch (err) {
+    console.error("❌ Database Error (Fetching Reproductive Health Types):", err);
+    res.status(500).json({ error: "Database error" });
+  }
+}); */
+
+/**
+ * ✅ Get Cancer Incidence & Mortality Data
  * URL: /api/cancer-data?type=lung&year=2015&gender=male&age=50-64
  */
 app.get("/api/cancer-data", async (req, res) => {
   try {
     const { type, year, gender, age } = req.query;
 
-    // ❌ Return error if type is missing
     if (!type) {
       return res.status(400).json({ error: "Cancer type is required" });
     }
@@ -273,6 +343,7 @@ app.get("/api/phu-data", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch public health unit data" });
   }
 });
+
 app.get("/api/disease-trends", async (req, res) => {
   try {
     const { region, diseaseType, specificType } = req.query;
