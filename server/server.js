@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import pg from "pg";
+import { Parser } from "json2csv"; 
 
 dotenv.config();
 
@@ -22,6 +23,81 @@ const pool = new pg.Pool({
 });
 
 app.listen(5000, () => console.log("✅ Server running on port 5000"));
+
+/**
+ * ✅ API Route: Download Filtered Health Data (CSV)
+ * URL Example: /api/download-data?type=lung&year=2015&gender=male&age=50-64
+ */
+app.get("/api/download-data", async (req, res) => {
+  try {
+    // ✅ Extract Query Parameters
+    const { disease, type, year, gender, age } = req.query;
+
+    // ✅ Validate Required Parameters
+    if (!disease || !type) {
+      return res.status(400).json({ error: "Disease and type are required" });
+    }
+
+    // ✅ Construct the Table Name
+    const tableName = `${disease.toLowerCase()}_incidence_${type.toLowerCase()}`;
+    console.log("📂 Table Name:", tableName);
+
+    // ✅ Check if the Table Exists
+    const tableExists = await pool.query(
+      `SELECT EXISTS (
+          SELECT 1 FROM information_schema.tables 
+          WHERE table_name = $1
+      )`,
+      [tableName]
+    );
+
+    if (!tableExists.rows[0].exists) {
+      return res.status(400).json({ error: "Invalid disease type" });
+    }
+
+    // ✅ Construct Measure Filter
+    let measureFilter = "Age-standardized rate (both sexes)"; // Default filter
+
+    if (age) {
+      measureFilter = `Age-specific rate (${age.replace("-", " to ")})`;
+    } else if (gender) {
+      measureFilter = `Age-standardized rate (${
+        gender.toLowerCase() === "both" ? "both sexes" : gender.toLowerCase() + "s"
+      })`;
+    }
+
+    // ✅ Build SQL Query
+    let query = `SELECT * FROM ${tableName} WHERE year = COALESCE($1, (SELECT MAX(year) FROM ${tableName}))`;
+    let values = [year || null];
+
+    query += ` AND measure ILIKE $${values.length + 1}`;
+    values.push(`%${measureFilter}%`);
+
+    console.log("📝 SQL Query:", query);
+    console.log("📊 Query Values:", values);
+
+    // ✅ Execute Query
+    const result = await pool.query(query, values);
+
+    // ✅ Handle No Data Case
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "No data found for the given filters" });
+    }
+
+    // ✅ Convert Data to CSV
+    const json2csvParser = new Parser();
+    const csv = json2csvParser.parse(result.rows);
+
+    // ✅ Send CSV File for Download
+    res.header("Content-Type", "text/csv");
+    res.attachment(`Filtered_${disease}_${type}_Data_${year || "latest"}.csv`);
+    return res.send(csv);
+
+  } catch (error) {
+    console.error("❌ Server Error:", error);
+    res.status(500).json({ error: "Server error generating file." });
+  }
+});
 
 // ✅ API Route: Get Available Years from the Cancer Table
 app.get("/api/available-years", async (req, res) => {

@@ -18,7 +18,10 @@ const DiseaseSelector = ({
         {diseaseTypes.map((disease) => (
           <button
             key={disease}
-            onClick={() => setSelectedDisease(disease)}
+            onClick={() => 
+              setSelectedDisease(disease)
+            }
+            
             className={`px-4 py-2 rounded-lg font-semibold transition ${
               selectedDisease === disease
                 ? "bg-blue-600 text-white"
@@ -36,7 +39,10 @@ const DiseaseSelector = ({
           {cancerTypes.map((type) => (
             <button
               key={type}
-              onClick={() => setSelectedCancerType(type)}
+              onClick={() => {
+                setSelectedCancerType(type);
+                console.log("✅ User Selected Cancer Type:", type);
+              }}
               className={`px-3 py-1 rounded-lg text-sm font-semibold transition ${
                 selectedCancerType === type
                   ? "bg-blue-500 text-white"

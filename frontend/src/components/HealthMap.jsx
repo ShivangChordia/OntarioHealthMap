@@ -256,6 +256,12 @@ const HealthMap = () => {
           selectedGender={selectedGender}
           setSelectedGender={setSelectedGender}
           resetFilters={resetFilters}
+          selectedDisease={selectedDisease}  
+          setSelectedDisease={setSelectedDisease} 
+          selectedCancerType={selectedCancerType}  
+          setSelectedCancerType={setSelectedCancerType}
+          selectedChronicType={selectedChronicType}
+          setSelectedChronicType={setSelectedChronicType}
         />
       )}
 
