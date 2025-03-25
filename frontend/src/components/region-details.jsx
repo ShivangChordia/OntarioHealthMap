@@ -7,123 +7,39 @@ const RegionDetails = ({
   selectedChronicType,
   handleDetailedAnalysis,
 }) => {
-  // Determine the data type title and details based on selected disease
-  const getDataTypeInfo = () => {
-    if (selectedDisease === "Cancer") {
-      return {
-        title: "Cancer Data",
-        typeLabel: selectedCancerType.toUpperCase(),
-        rateLabel: "Incidence Rate",
-      };
-    } else if (selectedDisease === "Chronic") {
-      return {
-        title: "Chronic Disease Data",
-        typeLabel: selectedChronicType,
-        rateLabel: "Prevalence Rate",
-      };
-    } else if (selectedDisease === "Smoking") {
-      return {
-        title: "Smoking Statistics",
-        typeLabel: "Tobacco Use",
-        rateLabel: "Usage Rate",
-      };
-    } else if (selectedDisease === "Reproductive") {
-      return {
-        title: "Reproductive Health",
-        typeLabel: "Reproductive Indicators",
-        rateLabel: "Rate",
-      };
-    } else if (selectedDisease === "Overall Health") {
-      return {
-        title: "Overall Health Metrics",
-        typeLabel: "Health Indicators",
-        rateLabel: "Health Index",
-      };
-    } else {
-      return {
-        title: "Health Data",
-        typeLabel: "General",
-        rateLabel: "Rate",
-      };
+  // Function to determine the formatted statement based on the disease type
+  const generateStatement = () => {
+    if (!selectedRegion || !selectedRegion.healthData || selectedRegion.healthData.length === 0) {
+      return `No ${selectedDisease.toLowerCase()} data available for this region.`;
     }
-  };
 
-  const dataTypeInfo = getDataTypeInfo();
+    const entry = selectedRegion.healthData[0]; // Assuming first entry is the most relevant
+
+    let statement = `In the ${selectedRegion.name},`;
+
+    if (selectedDisease === "Cancer") {
+      statement += ` the estimated incidence rate for ${selectedCancerType.toLowerCase()} cancer was ${entry.rate} per 100,000 individuals in ${entry.year}, with a 95% confidence interval of ${entry.ci}. A total of ${entry.cases} cases were recorded.`;
+    } else if (selectedDisease === "Chronic") {
+      statement += ` the estimated prevalence rate for ${selectedChronicType.toLowerCase()} was ${entry.rate}% in ${entry.year}, affecting approximately ${entry.cases} individuals. The prevalence was observed with a confidence interval of ${entry.ci}.`;
+    } else if (selectedDisease === "Smoking") {
+      statement += ` the estimated smoking rate among adults was ${entry.rate}% in ${entry.year}, with a 95% confidence interval of ${entry.ci}. The sample size for this estimate was ${entry.sampleSize || 'N/A'}.`;
+    } else if (selectedDisease === "Reproductive") {
+      statement += ` the reproductive health indicators showed a rate of ${entry.rate} per 100,000 in ${entry.year}, with a confidence interval of ${entry.ci}.`;
+    } else if (selectedDisease === "Overall Health") {
+      statement += ` the overall health index was measured at ${entry.rate} in ${entry.year}, with a confidence interval of (${entry.ci}).`;
+    }
+
+    statement += ` According to regional estimates, the population of this area was ${selectedRegion.phu?.population || 'N/A'}, with a median income of $${selectedRegion.phu?.median_total_income?.toLocaleString() || 'N/A'}. For more demographic, social, and economic data, visit the Census County Profile.`;
+    
+    return statement;
+  };
 
   return (
     <div className="w-100 h-full bg-white shadow-lg p-6 overflow-auto border-l border-gray-300">
       <h2 className="text-xl font-bold mb-4">{selectedRegion.name}</h2>
-
-      {selectedRegion.phu && selectedRegion.phu.population ? (
-        <>
-          <p>
-            <b>Region:</b> {selectedRegion.phu.region || "N/A"}
-          </p>
-          <p>
-            <b>Population:</b> {selectedRegion.phu.population || "N/A"}
-          </p>
-          <p>
-            <b>Median Income:</b> $
-            {selectedRegion.phu.median_total_income || "N/A"}
-          </p>
-        </>
-      ) : (
-        <p className="text-gray-500">No demographic data available.</p>
-      )}
-
-      <hr className="my-4" />
-
-      <h3 className="text-lg font-semibold">{dataTypeInfo.title}</h3>
-      {selectedRegion.healthData && selectedRegion.healthData.length > 0 ? (
-        selectedRegion.healthData.map((entry, index) => (
-          <div key={index} className="border-b py-2">
-            <p>
-              <b>Type:</b> {dataTypeInfo.typeLabel}
-            </p>
-            <p>
-              <b>{dataTypeInfo.rateLabel}:</b> {entry.rate || "N/A"} per 100,000
-            </p>
-            <p>
-              <b>Cases:</b> {entry.cases || "N/A"}
-            </p>
-            {entry.prevalence && (
-              <p>
-                <b>Prevalence:</b> {entry.prevalence || "N/A"}
-              </p>
-            )}
-            {entry.mortality && (
-              <p>
-                <b>Mortality:</b> {entry.mortality || "N/A"}
-              </p>
-            )}
-            {entry.ci && (
-              <p>
-                <b>Confidence Interval:</b> {entry.ci || "N/A"}
-              </p>
-            )}
-            <p>
-              <b>Year:</b> {entry.year || "N/A"}
-            </p>
-            {/* Display additional metrics based on disease type */}
-            {selectedDisease === "Chronic" && entry.comorbidity && (
-              <p>
-                <b>Comorbidity Rate:</b> {entry.comorbidity || "N/A"}%
-              </p>
-            )}
-            {selectedDisease === "Smoking" && entry.quittingRate && (
-              <p>
-                <b>Quitting Success Rate:</b> {entry.quittingRate || "N/A"}%
-              </p>
-            )}
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-500">
-          No {selectedDisease.toLowerCase()} data available for this region.
-        </p>
-      )}
-
-      {/* "See Detailed Analysis" Button with dynamic text */}
+      
+      <p className="text-gray-700">{generateStatement()}</p>
+      
       <button
         onClick={handleDetailedAnalysis}
         className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition"
