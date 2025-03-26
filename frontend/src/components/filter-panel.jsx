@@ -51,7 +51,7 @@ const FilterPanel = ({
     console.log("🟢 Selected Disease:", selectedDisease);
     console.log("🟢 Selected Type:", finalSelectedType); // ✅ Correct naming
   
-    if (!selectedDisease || !finalSelectedType || finalSelectedType === "all") {
+    if (!selectedDisease || !finalSelectedType) {
       alert("Please select a specific disease type before downloading.");
       return;
     }
@@ -156,22 +156,24 @@ const FilterPanel = ({
         <button
           className={`w-full px-4 py-2 rounded-lg font-semibold ${
             selectedDisease &&
-            selectedDisease !== "all" &&
-            (selectedDisease !== "Cancer" || selectedCancerType !== "all") &&
-            (selectedDisease !== "Chronic" || selectedChronicType)
+            (
+              (selectedDisease === "Cancer" && selectedCancerType) || 
+              (selectedDisease === "Chronic" && selectedChronicType)
+            )
               ? "bg-green-600 text-white"
               : "bg-gray-300 text-gray-600 cursor-not-allowed"
           }`}
           onClick={handleDownload}
           disabled={
             !selectedDisease || 
-            selectedDisease === "all" || 
-            (selectedDisease === "Cancer" && selectedCancerType === "all") || 
-            (selectedDisease === "Chronic" && !selectedChronicType)
+            (selectedDisease === "Cancer" && !selectedCancerType) || 
+            (selectedDisease === "Chronic" && !selectedChronicType) || 
+            (selectedDisease !== "Cancer" && selectedDisease !== "Chronic")
           }
         >
           Download Data
-        </button>
+      </button>
+
       </div>
     </div>
   );
