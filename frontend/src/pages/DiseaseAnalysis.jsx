@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import DiseaseIncidenceMortalityChart from "../components/DiseaseIncidenceMortalityChart";
 import DiseaseAgeGroupChart from "../components/DIseaseAgeGroupChart";
-import OntarioCancerMap from "../components/OntarioCancerMap";
+import OntarioChoroplethMap from "../components/OntarioChoroplethMap";
 import { fetchDiseaseTrends } from "../utils/api";
 
 const DiseaseAnalysis = () => {
@@ -68,7 +68,15 @@ const DiseaseAnalysis = () => {
               {/* Incidence & Mortality Rate Over Time */}
               <DiseaseIncidenceMortalityChart diseaseData={trendData} />
               <DiseaseAgeGroupChart diseaseData={trendData} />
-              <OntarioCancerMap diseaseData={trendData} />
+              <OntarioChoroplethMap
+                diseaseData={trendData}
+                title={`${specificType} ${diseaseType} Incidence Map`}
+                measureOptions={[
+                  "Age-standardized rate (males)",
+                  "Age-standardized rate (females)",
+                ]}
+                dataKey="primary"
+              />
             </div>
           )}
         </div>

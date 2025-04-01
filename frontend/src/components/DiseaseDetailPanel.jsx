@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase"; // Import Firebase authentication
 import { onAuthStateChanged } from "firebase/auth"; // ✅ Import Firebase Auth
+import Papa from "papaparse";
+import { saveAs } from "file-saver"; // optional, or use native download
 
 const DiseaseDetailPanel = ({
   selectedCategory,
@@ -24,6 +26,21 @@ const DiseaseDetailPanel = ({
 
     return () => unsubscribe(); // Cleanup listener on unmount
   }, [navigate]);
+
+  const handleDownloadCSV = () => {
+    if (!diseaseData || diseaseData.length === 0) {
+      alert("No data available to download.");
+      return;
+    }
+
+    // Convert to CSV
+    const csv = Papa.unparse(diseaseData);
+
+    // Create Blob and trigger download
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const fileName = `${selectedCategory}_${selectedDisease}_filtered_data.csv`;
+    saveAs(blob, fileName);
+  };
 
   useEffect(() => {
     if (!selectedRegion?.name) {
@@ -69,11 +86,12 @@ const DiseaseDetailPanel = ({
   const medianIncome = phu?.median_total_income
     ? `$${phu.median_total_income.toLocaleString()}`
     : "N/A";
+  const phuPopulation = phu?.population;
 
   // ✅ Identify whether it's Age or Gender filter
   const filterType = selectedFilters.age
-    ? `Age-specific rate (${selectedFilters.age})`
-    : `Age-standardized rate (${selectedFilters.gender || "both sexes"})`;
+    ? `${selectedFilters.age}`
+    : `${selectedFilters.gender || "Age-standardized rate (both sexes)"}`;
 
   // ✅ Pass selected disease & category as state to analysis page
   const handleNavigation = () => {
@@ -92,29 +110,32 @@ const DiseaseDetailPanel = ({
       </h2>
       <p className="text-gray-600 mt-2">
         In the <b>{selectedRegion.name}</b>, the estimated incidence rate for{" "}
-        <b>{selectedDisease.toLowerCase()}</b> was{" "}
-        <b>{rate || "N/A"} per 100,000</b> individuals in <b>{year || "N/A"}</b>
-        , based on <b>{filterType}</b>, with a{" "}
+        <b>
+          {selectedDisease.toLowerCase()} {selectedCategory.toLowerCase()}
+        </b>{" "}
+        was <b>{rate || "0"} per 100,000</b> individuals in{" "}
+        <b>{year || "N/A"}</b>, based on <b>{filterType}</b>, with a{" "}
         <b>
           {ci
-            ? `95% confidence interval of (${ci})`
+            ? `95% confidence interval of ${ci}`
             : "no confidence interval available"}
         </b>
-        . A total of <b>{cases || "N/A"} cases</b> were recorded. According to
-        regional estimates, the population of this area was <b>{population}</b>,
-        with a median income of <b>{medianIncome}</b>.
+        . A total of <b>{cases || "0"} cases</b> were recorded. According to
+        regional estimates, the population of this area was{" "}
+        <b>{population || phuPopulation}</b>, with a median income of{" "}
+        <b>{medianIncome}</b>.
         <br />
       </p>
 
       <div className="mt-4 p-3 bg-gray-100 rounded-lg">
         <h3 className="text-sm font-medium text-blue-600">Incidence Rate</h3>
-        <p className="text-xl font-bold">{rate || "N/A"}</p>
+        <p className="text-xl font-bold">{rate || "0"}</p>
         <p className="text-sm text-gray-500">per 100,000</p>
       </div>
 
       <div className="mt-4 p-3 bg-green-100 rounded-lg">
         <h3 className="text-sm font-medium text-green-600">Total Cases</h3>
-        <p className="text-xl font-bold">{cases || "N/A"}</p>
+        <p className="text-xl font-bold">{cases || "0"}</p>
         <p className="text-sm text-gray-500">Total cases reported</p>
       </div>
 
@@ -129,14 +150,22 @@ const DiseaseDetailPanel = ({
       >
         See Detailed {selectedDisease} Analysis
       </button>
-      <a
-        href="https://www.publichealthontario.ca/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-center text-blue-500 underline "
-      >
-        Source: Public Health Ontario
-      </a>
+      <div className="mt-4 flex items-center justify-between">
+        <a
+          href="https://www.publichealthontario.ca/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 underline"
+        >
+          Source: Public Health Ontario
+        </a>
+        <button
+          onClick={handleDownloadCSV}
+          className="bg-green-600 text-white px-4 py-1 rounded-md hover:bg-green-700 transition text-sm"
+        >
+          📥 Download CSV
+        </button>
+      </div>
     </div>
   );
 };

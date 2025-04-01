@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://ontario-health-map-backend.vercel.app";
+const API_BASE_URL = "http://localhost:5000";
 
 // Fetch GeoJSON data
 export const fetchGeoData = async () => {
@@ -28,6 +28,13 @@ export const fetchAvailableYears = async (disease, type) => {
 
 // ✅ Fetch Available Age & Gender Filters
 export const fetchAvailableAgeGender = async (disease, type) => {
+  // 🚫 Skip filters for diseases that do not support age/gender measures
+  const noFilterDiseases = ["respiratory", "reproductive"];
+
+  if (noFilterDiseases.includes(disease.toLowerCase())) {
+    return { ageFilters: [], genderFilters: [] };
+  }
+
   try {
     const response = await fetch(
       `${API_BASE_URL}/api/available-age-gender?disease=${disease}&type=${type}`

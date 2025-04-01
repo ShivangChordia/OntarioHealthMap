@@ -28,12 +28,23 @@ app.get("/api/available-years", async (req, res) => {
   try {
     const { type, disease } = req.query;
 
-    if (!type || !disease) {
-      return res.status(400).json({ error: "Disease and type are required" });
+    if (!disease) {
+      return res.status(400).json({ error: "Disease is required" });
     }
 
-    // ✅ Determine the table name based on disease type
-    const tableName = `${disease.toLowerCase()}_incidence_${type.toLowerCase()}`;
+    let tableName;
+
+    // ✅ Determine table name logic based on disease
+    if (disease.toLowerCase() === "smoking") {
+      tableName = "smoking_incidence"; // fixed table name for smoking
+    } else {
+      if (!type) {
+        return res
+          .status(400)
+          .json({ error: "Type is required for this disease" });
+      }
+      tableName = `${disease.toLowerCase()}_incidence_${type.toLowerCase()}`;
+    }
 
     // ✅ Check if table exists
     const tableExists = await pool.query(
@@ -45,7 +56,7 @@ app.get("/api/available-years", async (req, res) => {
     );
 
     if (!tableExists.rows[0].exists) {
-      return res.status(400).json({ error: "Invalid disease type" });
+      return res.status(400).json({ error: "Invalid disease or type" });
     }
 
     // ✅ Fetch distinct years
@@ -69,7 +80,19 @@ app.get("/api/available-age-gender", async (req, res) => {
     }
 
     // ✅ Determine the table name based on disease type
-    const tableName = `${disease.toLowerCase()}_incidence_${type.toLowerCase()}`;
+    let tableName = `${disease.toLowerCase()}_incidence_${type.toLowerCase()}`;
+
+    // ✅ Determine table name logic based on disease
+    if (disease.toLowerCase() === "smoking") {
+      tableName = "smoking_incidence"; // fixed table name for smoking
+    } else {
+      if (!type) {
+        return res
+          .status(400)
+          .json({ error: "Type is required for this disease" });
+      }
+      tableName = `${disease.toLowerCase()}_incidence_${type.toLowerCase()}`;
+    }
 
     // ✅ Check if table exists
     const tableExists = await pool.query(
@@ -152,6 +175,160 @@ app.get("/api/cancer-data", async (req, res) => {
     res.status(500).json({ error: "Database error" });
   }
 });
+// 🟦 SMOKING DATA API
+app.get("/api/smoking-data", async (req, res) => {
+  try {
+    const { type, year, gender, age } = req.query;
+
+    if (!type || (type !== "Active" && type !== "Former")) {
+      return res.status(400).json({
+        error: "Valid type is required: must be 'active' or 'former'",
+      });
+    }
+
+    const tableName = `smoking_incidence`;
+
+    // ✅ Check if the table exists
+    const tableExists = await pool.query(
+      `SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables WHERE table_name = $1
+      )`,
+      [tableName]
+    );
+
+    if (!tableExists.rows[0].exists) {
+      return res.status(400).json({ error: "Smoking table does not exist" });
+    }
+
+    // ✅ Determine the correct `type` string for DB query
+    const smokingType =
+      type === "Active"
+        ? "Self-reported adult daily smoking rate"
+        : "Self-reported adult former smoking rate";
+
+    // ✅ Determine measure filter
+    let measureFilter = "Age-standardized rate (both sexes)";
+    if (age && !gender) {
+      measureFilter = age;
+    } else if (gender && !age) {
+      measureFilter = gender;
+    }
+
+    // ✅ Build query dynamically
+    let query = `SELECT * FROM ${tableName} WHERE type = $1`;
+    const values = [smokingType];
+
+    if (year) {
+      values.push(year);
+      query += ` AND year = $${values.length}`;
+    }
+
+    if (measureFilter) {
+      values.push(`%${measureFilter}%`);
+      query += ` AND measure ILIKE $${values.length}`;
+    }
+
+    query += ` ORDER BY year ASC`;
+
+    console.log("📝 Query:", query);
+    console.log("📊 Values:", values);
+
+    const result = await pool.query(query, values);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ Smoking Data Error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+// 🟦 RESPIRATORY DATA API
+app.get("/api/respiratory-data", async (req, res) => {
+  try {
+    const { type, year, geography } = req.query;
+
+    if (!type) {
+      return res
+        .status(400)
+        .json({ error: "Respiratory disease type required" });
+    }
+
+    const table = `respiratory_incidence_${type.toLowerCase()}`;
+
+    const tableExists = await pool.query(
+      `SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)`,
+      [table]
+    );
+
+    if (!tableExists.rows[0].exists) {
+      return res
+        .status(400)
+        .json({ error: "Invalid respiratory disease type" });
+    }
+
+    let query = `SELECT * FROM ${table} WHERE 1=1`;
+    const values = [];
+
+    if (year) {
+      values.push(year);
+      query += ` AND year = $${values.length}`;
+    }
+
+    if (geography) {
+      values.push(geography);
+      query += ` AND geography ILIKE $${values.length}`;
+    }
+
+    query += ` ORDER BY year ASC`;
+
+    const result = await pool.query(query, values);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ Respiratory Data Error:", err);
+    res.status(500).json({ error: "Error fetching respiratory data" });
+  }
+});
+
+// 🟦 REPRODUCTIVE DATA API
+app.get("/api/reproductive-data", async (req, res) => {
+  try {
+    const { year, geography, type } = req.query;
+
+    const table =
+      type === "HIV"
+        ? "reproductive_incidence_hiv"
+        : "reproductive_incidence_aids";
+
+    const tableExists = await pool.query(
+      `SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)`,
+      [table]
+    );
+
+    if (!tableExists.rows[0].exists) {
+      return res.status(400).json({ error: "Invalid reproductive data type" });
+    }
+
+    let query = `SELECT * FROM ${table} WHERE 1=1`;
+    const values = [];
+
+    if (year) {
+      values.push(year);
+      query += ` AND year = $${values.length}`;
+    }
+
+    if (geography) {
+      values.push(geography);
+      query += ` AND geography ILIKE $${values.length}`;
+    }
+
+    query += ` ORDER BY year ASC`;
+
+    const result = await pool.query(query, values);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ Reproductive Data Error:", err);
+    res.status(500).json({ error: "Error fetching reproductive health data" });
+  }
+});
 
 app.get("/api/chronic-data", async (req, res) => {
   try {
@@ -180,9 +357,9 @@ app.get("/api/chronic-data", async (req, res) => {
     let measureFilter = "Age-standardized rate (both sexes)"; // Default
 
     if (age && !gender) {
-      measureFilter = `Age-specific rate (${age.replace("-", " to ")})`;
+      measureFilter = age;
     } else if (gender && !age) {
-      measureFilter = `Age-standardized rate (${gender.toLowerCase()}s)`;
+      measureFilter = gender;
     }
 
     let query = `SELECT * FROM ${tableName} WHERE year = COALESCE($1, (SELECT MAX(year) FROM ${tableName}))`;

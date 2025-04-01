@@ -17,6 +17,24 @@ import {
 const Home = () => {
   const navigate = useNavigate();
 
+  // Add disease options so you can access them programmatically
+  const diseaseOptions = {
+    Cancer: [
+      "Aggregate",
+      "Breast",
+      "Colorectal",
+      "Lung",
+      "Prostate",
+      "Cervical",
+      "Oral",
+      "Malignant",
+    ],
+    Chronic: ["Diabetes", "Hypertension", "Asthma", "COPD"],
+    Smoking: ["Active", "Former"],
+    Reproductive: ["HIV", "AIDS"],
+    Respiratory: ["Influenza", "Covid", "Tuberculosis"],
+  };
+
   // Redirect to landing page if user is unauthenticated
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -56,6 +74,22 @@ const Home = () => {
         .catch((err) => console.error("Error fetching available years:", err));
     }
   }, [selectedDisease]);
+
+  useEffect(() => {
+    // Update selected disease to the first option in the new category
+    const defaultDisease = diseaseOptions[selectedCategory]?.[0] || "";
+    setSelectedDisease(defaultDisease);
+
+    // Reset filters too if needed
+    setFilters({
+      year: "",
+      age: "",
+      gender: "",
+      availableYears: [],
+      availableAges: [],
+      availableGenders: [],
+    });
+  }, [selectedCategory]);
 
   // Fetch available age & gender filters when disease changes
   useEffect(() => {
