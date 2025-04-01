@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://ontario-health-map-backend.vercel.app";
+const API_BASE_URL = "https://ontario-health-map-backend.vercel.app/";
 
 // Fetch GeoJSON data
 export const fetchGeoData = async () => {
@@ -84,5 +84,39 @@ export const fetchDiseaseTrends = async (diseaseType, specificType) => {
   } catch (error) {
     console.error("❌ API Error:", error);
     throw error;
+  }
+};
+
+export const fetchSmokingData = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/smoking-data?type=all`);
+    return await response.json();
+  } catch (err) {
+    console.error("Error fetching smoking data", err);
+    return [];
+  }
+};
+
+// ✅ Fetch Reproductive or Respiratory Disease Data
+export const fetchReproductiveOrRespiratoryData = async (
+  diseaseType,
+  specificType
+) => {
+  try {
+    let endpoint = "";
+    if (diseaseType === "Reproductive") {
+      endpoint = `/api/reproductive-data?type=${specificType}`;
+    } else if (diseaseType === "Respiratory") {
+      endpoint = `/api/respiratory-data?type=${specificType}`;
+    } else {
+      throw new Error("Invalid disease type for this fetch function.");
+    }
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching reproductive or respiratory data:", error);
+    return [];
   }
 };

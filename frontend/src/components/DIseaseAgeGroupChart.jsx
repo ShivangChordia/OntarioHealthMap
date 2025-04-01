@@ -34,7 +34,6 @@ const DiseaseAgeGroupChart = ({ diseaseData }) => {
       ...new Set(diseaseData.primary.map((entry) => entry.year)),
     ].sort();
 
-    // ✅ Function to check if any entry exists for a group
     const hasData = (ageGroup) => {
       const inPrimary = diseaseData.primary.some((d) =>
         d.measure.includes(ageGroup)
@@ -45,7 +44,6 @@ const DiseaseAgeGroupChart = ({ diseaseData }) => {
       return inPrimary || inSecondary;
     };
 
-    // ✅ Filter age groups to only those that have data
     const validAgeGroups = rawAgeGroups.filter(hasData);
 
     const getRate = (ageGroup, year, dataset) => {
@@ -90,6 +88,23 @@ const DiseaseAgeGroupChart = ({ diseaseData }) => {
       <h2 className="text-lg font-semibold text-center mb-2 text-gray-700">
         Incidence & Mortality Rate by Age Group
       </h2>
+
+      {/* 🔍 Insight Section */}
+      <div className="bg-green-50 border-l-4 border-green-400 text-sm text-green-800 p-3 mb-4 rounded-md">
+        <p className="font-medium mb-1">Insight:</p>
+        <ul className="list-disc list-inside space-y-1">
+          <li>Understand which age groups are most affected by the disease.</li>
+          <li>
+            Compare how risk varies across age brackets and identify vulnerable
+            populations.
+          </li>
+          <li>
+            Detect changes in age-based patterns over time to inform targeted
+            healthcare strategies.
+          </li>
+        </ul>
+      </div>
+
       {isLoading ? (
         <p className="text-center text-gray-500">Loading data...</p>
       ) : chartData && chartData.labels.length > 0 ? (

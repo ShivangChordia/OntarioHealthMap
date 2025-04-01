@@ -17,7 +17,7 @@ const generateColorBins = (min, max) => {
     const end = (min + step * (i + 1)).toFixed(1);
     bins.push({
       range: [parseFloat(start), parseFloat(end)],
-      color: `rgba(255, ${210 - i * 40}, ${210 - i * 40}, 0.85)`, // gradient red
+      color: `rgba(255, ${210 - i * 40}, ${210 - i * 40}, 0.85)`,
     });
   }
   return bins;
@@ -33,6 +33,7 @@ const OntarioChoroplethMap = ({
   const [selectedMeasure, setSelectedMeasure] = useState(measureOptions[0]);
   const [colorBins, setColorBins] = useState([]);
 
+  // 🔄 Load GeoJSON once
   useEffect(() => {
     const loadGeo = async () => {
       const geoJSON = await fetchGeoData();
@@ -41,19 +42,28 @@ const OntarioChoroplethMap = ({
     loadGeo();
   }, []);
 
+  // ✅ Normalize & map region names to rates
   const ratesByRegion = useMemo(() => {
     const regionRates = {};
     diseaseData[dataKey]?.forEach((entry) => {
-      if (entry.measure.includes(selectedMeasure)) {
-        const region = entry.geography;
-        regionRates[region] = entry.rate;
+      const measureMatch =
+        entry.measure &&
+        entry.measure.toLowerCase().includes(selectedMeasure.toLowerCase());
+
+      if (measureMatch) {
+        const region = entry.geography?.trim().toLowerCase();
+        if (region) regionRates[region] = entry.rate;
       }
     });
     return regionRates;
   }, [diseaseData, selectedMeasure, dataKey]);
 
+  // 🎨 Generate color bins dynamically
   useEffect(() => {
-    const values = Object.values(ratesByRegion).filter((val) => val !== null);
+    const values = Object.values(ratesByRegion).filter(
+      (val) => val !== null && val !== undefined && !isNaN(val)
+    );
+    if (values.length === 0) return;
     const min = Math.min(...values);
     const max = Math.max(...values);
     setColorBins(generateColorBins(min, max));
@@ -63,11 +73,11 @@ const OntarioChoroplethMap = ({
     for (const bin of colorBins) {
       if (rate >= bin.range[0] && rate <= bin.range[1]) return bin.color;
     }
-    return "#f0f0f0";
+    return "#f0f0f0"; // fallback
   };
 
   const styleFeature = (feature) => {
-    const name = feature.properties.NAME_ENG;
+    const name = feature.properties.NAME_ENG?.trim().toLowerCase();
     const rate = ratesByRegion[name];
     return {
       fillColor: rate ? getColor(rate) : "#e0e0e0",
@@ -79,10 +89,11 @@ const OntarioChoroplethMap = ({
   };
 
   const onEachFeature = (feature, layer) => {
-    const name = feature.properties.NAME_ENG;
+    const rawName = feature.properties.NAME_ENG;
+    const name = rawName?.trim().toLowerCase();
     const rate = ratesByRegion[name];
     const tooltipContent = `
-      <strong>${name}</strong><br/>
+      <strong>${rawName}</strong><br/>
       ${selectedMeasure}<br/>
       <b>${rate ? rate.toFixed(2) : "No data"}</b> per 100,000
     `;
@@ -93,11 +104,31 @@ const OntarioChoroplethMap = ({
   };
 
   return (
-    <div className="bg-white p-6 shadow-md rounded-lg">
+    <div className="bg-white p-6 shadow-md rounded-lg z-0">
       <h2 className="text-lg font-semibold text-center mb-4">
         {title} {dataKey === "primary" ? "Incidence" : "Mortality"} Map
       </h2>
 
+      {/* 🔍 Insight Section */}
+      <div className="bg-blue-50 border-l-4 border-blue-400 text-sm text-blue-800 p-3 mb-4 rounded-md">
+        <p className="font-medium mb-1">Insight:</p>
+        <ul className="list-disc list-inside space-y-1">
+          <li>
+            Visualize how disease incidence or mortality varies across Ontario’s
+            public health regions.
+          </li>
+          <li>
+            Darker areas indicate higher rates — helpful for detecting hotspots
+            needing intervention.
+          </li>
+          <li>
+            Useful for regional resource planning and comparing geographic
+            health burdens.
+          </li>
+        </ul>
+      </div>
+
+      {/* 🔘 Measure selector */}
       <div className="flex flex-wrap justify-center gap-2 mb-4">
         {measureOptions.map((measure) => (
           <button
@@ -114,9 +145,9 @@ const OntarioChoroplethMap = ({
         ))}
       </div>
 
+      {/* 🗺 Map Display */}
       {geoData ? (
         <div className="relative">
-          {/* 🗺 Map */}
           <MapContainer
             center={[50, -85]}
             zoom={5}
@@ -126,7 +157,7 @@ const OntarioChoroplethMap = ({
             dragging={false}
             doubleClickZoom={false}
             zoomControl={false}
-            className="h-[500px] w-full rounded-md"
+            className="h-[500px] w-full rounded-md z-0"
           >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             <GeoJSON
@@ -136,8 +167,8 @@ const OntarioChoroplethMap = ({
             />
           </MapContainer>
 
-          {/* 🧭 Legend in Top Right */}
-          <div className="absolute top-4 right-4 bg-white p-3 shadow rounded-md text-sm text-gray-700 space-y-1 z-[1000]">
+          {/* 🧭 Legend */}
+          <div className="absolute top-4 right-4 bg-white p-3 shadow rounded-md text-sm text-gray-700 space-y-1 z-10">
             <h4 className="font-semibold text-center mb-1">Legend</h4>
             {colorBins.map((bin, i) => (
               <div key={i} className="flex items-center gap-2">

@@ -175,18 +175,18 @@ app.get("/api/cancer-data", async (req, res) => {
     res.status(500).json({ error: "Database error" });
   }
 });
-// 🟦 SMOKING DATA API
+
 app.get("/api/smoking-data", async (req, res) => {
   try {
     const { type, year, gender, age } = req.query;
 
-    if (!type || (type !== "Active" && type !== "Former")) {
+    if (!type || !["Former", "Active", "all"].includes(type)) {
       return res.status(400).json({
-        error: "Valid type is required: must be 'active' or 'former'",
+        error: "Valid type is required: 'Former', 'Active', or 'all'",
       });
     }
 
-    const tableName = `smoking_incidence`;
+    const tableName = "smoking_incidence";
 
     // ✅ Check if the table exists
     const tableExists = await pool.query(
@@ -200,12 +200,6 @@ app.get("/api/smoking-data", async (req, res) => {
       return res.status(400).json({ error: "Smoking table does not exist" });
     }
 
-    // ✅ Determine the correct `type` string for DB query
-    const smokingType =
-      type === "Active"
-        ? "Self-reported adult daily smoking rate"
-        : "Self-reported adult former smoking rate";
-
     // ✅ Determine measure filter
     let measureFilter = "Age-standardized rate (both sexes)";
     if (age && !gender) {
@@ -214,9 +208,19 @@ app.get("/api/smoking-data", async (req, res) => {
       measureFilter = gender;
     }
 
-    // ✅ Build query dynamically
-    let query = `SELECT * FROM ${tableName} WHERE type = $1`;
-    const values = [smokingType];
+    // ✅ Build dynamic query
+    let query = `SELECT * FROM ${tableName} WHERE 1=1`;
+    const values = [];
+
+    // Apply type filter if not "all"
+    if (type !== "all") {
+      const smokingType =
+        type === "Former"
+          ? "Self-reported adult former smoking rate"
+          : "Self-reported adult daily smoking rate";
+      values.push(smokingType);
+      query += ` AND type = $${values.length}`;
+    }
 
     if (year) {
       values.push(year);
@@ -533,12 +537,17 @@ app.get("/api/disease-trends", async (req, res) => {
 
     try {
       if (secondaryQuery) secondaryResult = await pool.query(secondaryQuery);
+    } catch (error) {
+      console.warn(
+        `Secondary data not available for ${diseaseType} - ${type || ""}`
+      );
+    }
+
+    try {
       if (tertiaryQuery) tertiaryResult = await pool.query(tertiaryQuery);
     } catch (error) {
       console.warn(
-        `Secondary/Tertiary data not available for ${diseaseType} - ${
-          type || ""
-        }`
+        `Tertiary data not available for ${diseaseType} - ${type || ""}`
       );
     }
 
