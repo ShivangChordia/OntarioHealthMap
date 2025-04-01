@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import { fetchDiseaseTrends } from "../utils/api";
 
 Chart.register(...registerables);
