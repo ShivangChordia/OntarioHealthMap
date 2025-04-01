@@ -1,78 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Line } from "react-chartjs-2";
-import { Chart, registerables } from "chart.js";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import DiseaseIncidenceMortalityChart from "../components/DiseaseIncidenceMortalityChart";
+import DiseaseAgeGroupChart from "../components/DiseaseAgeGroupChart";
 import { fetchDiseaseTrends } from "../utils/api";
-
-Chart.register(...registerables);
 
 const DiseaseAnalysis = () => {
   const location = useLocation();
   const { diseaseType, specificType } = location.state || {};
 
-  const [trendData, setTrendData] = useState({ primary: [], secondary: [] });
-  const [chartData, setChartData] = useState(null);
+  const [trendData, setTrendData] = useState({
+    primary: [],
+    secondary: [],
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!diseaseType || !specificType) return;
+    if (!diseaseType) return;
 
     const loadTrendData = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
-        // Fetch disease trends from API
         const data = await fetchDiseaseTrends(diseaseType, specificType);
 
         if (!data.primary.length && !data.secondary.length) {
-          setError(`No ${diseaseType} data found for ${specificType}`);
+          setTrendData({ primary: [], secondary: [] });
           setIsLoading(false);
           return;
         }
 
         setTrendData(data);
-
-        // Extract years and rates for line chart
-        const years = [
-          ...new Set(data.primary.map((entry) => entry.year)),
-        ].sort();
-        const incidenceRates = years.map(
-          (year) => data.primary.find((d) => d.year === year)?.rate || null
-        );
-        const mortalityRates = years.map(
-          (year) => data.secondary.find((d) => d.year === year)?.rate || null
-        );
-
-        setChartData({
-          labels: years,
-          datasets: [
-            {
-              label: "Incidence Rate (per 100,000)",
-              data: incidenceRates,
-              borderColor: "#2563EB",
-              backgroundColor: "rgba(37, 99, 235, 0.2)",
-              tension: 0.4,
-              fill: true,
-            },
-            {
-              label: "Mortality Rate (per 100,000)",
-              data: mortalityRates,
-              borderColor: "#DC2626",
-              backgroundColor: "rgba(220, 38, 38, 0.2)",
-              tension: 0.4,
-              fill: true,
-            },
-          ],
-        });
-
-        setIsLoading(false);
       } catch (err) {
-        setError(`Failed to load ${diseaseType} data.`);
+        setError(`Error loading ${diseaseType} data. Please try again.`);
         console.error(err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -80,40 +46,34 @@ const DiseaseAnalysis = () => {
   }, [diseaseType, specificType]);
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <>
       <Navbar />
-      <div className="container mx-auto px-6 py-6">
-        <h1 className="text-3xl font-bold text-center text-gray-800">
-          {diseaseType} - {specificType} Analysis
-        </h1>
+      <div className="bg-gray-100 min-h-screen">
+        <div className="container mx-auto px-6 pt-6">
+          {/* Page Title */}
+          <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
+            {specificType} {diseaseType} - Analysis
+          </h1>
 
-        {/* Data Overview Section */}
-        <div className="mt-6 bg-white shadow-md p-6 rounded-lg">
-          <p className="text-gray-700 text-lg">
-            Analyzing historical data for <b>{specificType}</b> under{" "}
-            <b>{diseaseType}</b>. The chart below shows trends over the years
-            for incidence and mortality rates.
-          </p>
+          {/* Loading & Error Handling */}
+          {isLoading && (
+            <p className="text-center text-gray-500 py-4">Loading data...</p>
+          )}
+          {error && <p className="text-center text-red-500 py-4">{error}</p>}
+
+          {/* Charts Section */}
+          {!isLoading && !error && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Incidence & Mortality Rate Over Time */}
+              <DiseaseIncidenceMortalityChart diseaseData={trendData} />
+
+              <DiseaseAgeGroupChart diseaseData={trendData} />
+            </div>
+          )}
         </div>
-
-        {/* Loading & Error Messages */}
-        {isLoading && (
-          <p className="text-center text-gray-500 mt-6">Loading data...</p>
-        )}
-        {error && <p className="text-center text-red-500 mt-6">{error}</p>}
-
-        {/* Incidence & Mortality Over Time Chart */}
-        {!isLoading && !error && chartData && (
-          <div className="mt-6 bg-white shadow-md p-6 rounded-lg">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">
-              Incidence & Mortality Rate Over Time
-            </h2>
-            <Line data={chartData} options={{ responsive: true }} />
-          </div>
-        )}
       </div>
       <Footer />
-    </div>
+    </>
   );
 };
 

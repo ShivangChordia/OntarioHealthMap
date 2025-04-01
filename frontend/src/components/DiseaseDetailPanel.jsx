@@ -124,7 +124,7 @@ const DiseaseDetailPanel = ({
       </div>
 
       <button
-        className="mt-4 w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+        className="mt-4 mb-3 w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
         onClick={handleNavigation}
       >
         See Detailed {selectedDisease} Analysis
@@ -133,7 +133,7 @@ const DiseaseDetailPanel = ({
         href="https://www.publichealthontario.ca/"
         target="_blank"
         rel="noopener noreferrer"
-        className="text-center text-blue-300 underline "
+        className="text-center text-blue-500 underline "
       >
         Source: Public Health Ontario
       </a>

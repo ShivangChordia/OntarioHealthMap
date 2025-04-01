@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://ontario-health-map-backend.vercel.app";
+const API_BASE_URL = "http://localhost:5000";
 
 // Fetch GeoJSON data
 export const fetchGeoData = async () => {
