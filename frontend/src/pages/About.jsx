@@ -28,7 +28,7 @@ const About = () => {
               {/* Left Side - Image */}
               <div className="md:w-1/2 flex">
                 <img
-                  src="/assets/About.png"
+                  src="/assets/about.jpg"
                   alt="Health data visualization"
                   className="rounded-lg shadow-lg w-full object-cover h-100"
                   onError={(e) => {
