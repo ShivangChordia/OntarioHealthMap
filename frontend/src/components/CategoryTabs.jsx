@@ -6,7 +6,7 @@ const CategoryTabs = ({ selectedCategory, setSelectedCategory }) => {
     "Chronic",
     "Smoking",
     "Reproductive",
-    "Overall",
+    "Respiratory",
   ];
 
   return (

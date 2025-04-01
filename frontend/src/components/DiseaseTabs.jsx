@@ -19,7 +19,7 @@ const DiseaseTabs = ({
       "Malignant",
     ],
     Chronic: ["Diabetes", "Hypertension", "Asthma", "COPD"],
-    Reproductive: ["Overall", "HIV", "AIDS"],
+    Reproductive: ["HIV", "AIDS"],
     Respiratory: ["Influenza", "Covid-19", "Tuberculosis"],
   };
 

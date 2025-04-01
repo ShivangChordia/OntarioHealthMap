@@ -3,7 +3,8 @@ import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import DiseaseIncidenceMortalityChart from "../components/DiseaseIncidenceMortalityChart";
-import DiseaseAgeGroupChart from "../components/DIseaseAgeGroupChart";
+import DiseaseAgeGroupChart from "../components/DiseaseAgeGroupChart";
+import OntarioCancerMap from "../components/OntarioCancermap";
 import { fetchDiseaseTrends } from "../utils/api";
 
 const DiseaseAnalysis = () => {
@@ -66,8 +67,8 @@ const DiseaseAnalysis = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Incidence & Mortality Rate Over Time */}
               <DiseaseIncidenceMortalityChart diseaseData={trendData} />
-
               <DiseaseAgeGroupChart diseaseData={trendData} />
+              <OntarioCancerMap diseaseData={trendData} />
             </div>
           )}
         </div>
