@@ -1,9 +1,36 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase"; // Import Firebase auth instance
+import Navbar from "../components/navbar";
+import Footer from "../components/footer";
 
 const LandingPage = () => {
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  // Check if user is authenticated
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigate("/home"); // Redirect to home if authenticated
+      } else {
+        setLoading(false); // Only stop loading if no user is found
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup subscription on unmount
+  }, [navigate]);
+
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-lg text-gray-500">Checking authentication...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-100 min-h-screen">
       {/* Header */}

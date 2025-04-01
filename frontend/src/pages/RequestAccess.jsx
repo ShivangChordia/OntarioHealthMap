@@ -222,7 +222,7 @@ const RequestAccess = () => {
         {/* Back to Home */}
         <div className="text-center mt-4">
           <Link to="/" className="text-blue-600 hover:underline">
-            ← Back to Home
+            ← Back
           </Link>
         </div>
       </div>

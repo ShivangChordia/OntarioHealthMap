@@ -1,68 +1,137 @@
-import React, { useState } from "react";
-import Navbar from "../components/Navbar";
-import HealthMap from "../components/HealthMap";
-import Footer from "../components/Footer";
-import CategoryTabs from "../components/disease-selector";
-import SearchBar from "../components/SearchBar";
-import StatsCard from "../components/region-details";
-import FilterPanel from "../components/filter-panel";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase";
+import Navbar from "../components/navbar";
+import Footer from "../components/footer";
+import CategoryTabs from "../components/CategoryTabs";
+import DiseaseTabs from "../components/DiseaseTabs";
+import OntarioMap from "../components/OntarioMap";
+import DiseaseDetailPanel from "../components/DiseaseDetailPanel";
+import {
+  fetchDiseaseData,
+  fetchAvailableYears,
+  fetchAvailableAgeGender,
+} from "../utils/api";
 
 const Home = () => {
-  const [activeCategory, setActiveCategory] = useState("Cancer");
-  const [showFilters, setShowFilters] = useState(false);
+  const navigate = useNavigate();
+
+  // Redirect to landing page if user is unauthenticated
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        navigate("/"); // Redirect to landing page if user is not logged in
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup listener on unmount
+  }, [navigate]);
+
+  // State for selected category and disease
+  const [selectedCategory, setSelectedCategory] = useState("Cancer");
+  const [selectedRegion, setSelectedRegion] = useState({
+    name: "Ontario",
+    phu: { median_total_income: 70500 },
+  }); // ✅ Default to Ontario
+
+  const [selectedDisease, setSelectedDisease] = useState("Aggregate");
+  const [filters, setFilters] = useState({
+    year: "",
+    age: "",
+    gender: "",
+    availableYears: [],
+    availableAges: [],
+    availableGenders: [],
+  });
+  const [diseaseData, setDiseaseData] = useState([]); // Store disease data
+
+  // Fetch available years when disease changes
+  useEffect(() => {
+    if (selectedDisease) {
+      fetchAvailableYears(selectedCategory, selectedDisease)
+        .then((years) => {
+          setFilters((prev) => ({ ...prev, availableYears: years || [] }));
+        })
+        .catch((err) => console.error("Error fetching available years:", err));
+    }
+  }, [selectedDisease]);
+
+  // Fetch available age & gender filters when disease changes
+  useEffect(() => {
+    if (selectedDisease) {
+      fetchAvailableAgeGender(selectedCategory, selectedDisease)
+        .then(({ ageFilters, genderFilters }) => {
+          setFilters((prev) => ({
+            ...prev,
+            availableAges: ageFilters || [],
+            availableGenders: genderFilters || [],
+          }));
+        })
+        .catch((err) =>
+          console.error("Error fetching age/gender filters:", err)
+        );
+    }
+  }, [selectedDisease]);
+
+  // Fetch disease data when filters change
+  useEffect(() => {
+    if (selectedDisease) {
+      fetchDiseaseData({
+        disease: selectedCategory,
+        type: selectedDisease,
+        year: filters.year,
+        age: filters.age,
+        gender: filters.gender,
+      })
+        .then((data) => setDiseaseData(data))
+        .catch((err) => console.error("Error fetching disease data:", err));
+    }
+  }, [selectedDisease, filters]);
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <>
       <Navbar />
+      <div className="bg-gray-100">
+        {/* Categories Tabs */}
+        <div className="container mx-auto px-6 pt-6">
+          <CategoryTabs
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+          />
+          <DiseaseTabs
+            selectedCategory={selectedCategory}
+            selectedDisease={selectedDisease}
+            setSelectedDisease={setSelectedDisease}
+            filters={filters}
+            setFilters={setFilters}
+          />
+        </div>
 
-      {/* Search Bar & Category Selector */}
-      <div className="container mx-auto px-6 pt-20">
-        <SearchBar />
-        <CategoryTabs
-          activeCategory={activeCategory}
-          setActiveCategory={setActiveCategory}
-        />
+        {/* Main Content Layout */}
+        <div className="container mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left: Map Section */}
+          <div className="lg:col-span-2 bg-white rounded-lg shadow p-4">
+            <OntarioMap
+              selectedDisease={selectedDisease}
+              setSelectedRegion={setSelectedRegion}
+            />
+          </div>
+
+          {/* Right: Disease Details Panel */}
+          <div className="bg-white rounded-lg shadow p-4">
+            <DiseaseDetailPanel
+              selectedCategory={selectedCategory}
+              selectedDisease={selectedDisease}
+              diseaseData={diseaseData}
+              selectedRegion={selectedRegion}
+              selectedFilters={filters}
+            />
+          </div>
+        </div>
       </div>
-
-      {/* Health Map */}
-      <div className="container mx-auto mt-6">
-        <HealthMap />
-      </div>
-
-      {/* Statistics Section */}
-      <div className="container mx-auto mt-6 grid grid-cols-1 md:grid-cols-3 gap-6 px-6">
-        <StatsCard
-          title="Incidence Rate"
-          value="561.2"
-          description="Per 100,000 people"
-        />
-        <StatsCard
-          title="Total Cases"
-          value="521"
-          description="Recorded in 2014"
-        />
-        <StatsCard
-          title="Median Income"
-          value="$78,500"
-          description="For this region"
-        />
-      </div>
-
-      {/* Filters Button */}
-      <div className="flex justify-center mt-6">
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          onClick={() => setShowFilters(true)}
-        >
-          Open Filters
-        </button>
-      </div>
-
-      {/* Filters Panel (Popup) */}
-      {showFilters && <FilterPanel onClose={() => setShowFilters(false)} />}
-
       <Footer />
-    </div>
+    </>
   );
 };
 

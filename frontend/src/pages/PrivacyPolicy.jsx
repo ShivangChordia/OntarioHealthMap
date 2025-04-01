@@ -1,6 +1,6 @@
 import React from "react";
-import Footer from "../components/Footer";
-import Navbar from "../components/Navbar";
+import Footer from "../components/footer";
+import Navbar from "../components/navbar";
 
 const PrivacyPolicy = () => {
   return (
@@ -123,29 +123,20 @@ const PrivacyPolicy = () => {
                 7. Contact Us
               </h2>
               <p className="mt-4 text-lg text-gray-700">
-                If you have any questions about this Privacy Policy, please
+                If you have any questions about our Privacy Policy, please
                 contact us at:
               </p>
               <p className="mt-2 text-lg">
                 📧 Email:{" "}
                 <a
-                  href="mailto:support@ontariohealthmaps.com"
+                  href="mailto:ontariohealthmaps@gmail.com"
                   className="text-blue-600 hover:underline"
                 >
-                  support@ontariohealthmaps.com
+                  ontariohealthmaps@gmail.com
                 </a>
               </p>
             </section>
           </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-16 bg-blue-700 text-white text-center">
-          <h2 className="text-3xl font-bold">Need More Information?</h2>
-          <p className="mt-4 text-lg">
-            Contact our support team if you have any questions about our Privacy
-            Policy.
-          </p>
         </section>
 
         <Footer />

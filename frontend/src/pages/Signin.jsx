@@ -111,10 +111,12 @@ const SignIn = () => {
           </Link>
         </div>
 
-        {/* Security Note */}
-        <p className="text-center text-xs text-gray-400 mt-4">
-          Protected by enterprise-grade security
-        </p>
+        {/* Back to Home */}
+        <div className="text-center mt-4">
+          <Link to="/" className="text-blue-600 hover:underline">
+            ← Back
+          </Link>
+        </div>
       </div>
     </div>
   );

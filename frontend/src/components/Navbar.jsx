@@ -1,58 +1,75 @@
-import { Link } from "react-router-dom";
-import { auth } from "../firebase"; // Import Firebase Auth
-import { useState, useEffect } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth"; // Import auth state listener & sign out
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Map, Search } from "lucide-react";
+import { auth } from "../firebase";
+import { signOut, onAuthStateChanged } from "firebase/auth";
 
 const Navbar = () => {
   const [user, setUser] = useState(null);
+  const navigate = useNavigate(); // Initialize navigation hook
 
-  // Check if user is authenticated
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser); // Set user state if authenticated
+      setUser(currentUser);
     });
-
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe();
   }, []);
 
-  // Handle sign out
   const handleSignOut = async () => {
-    await signOut(auth);
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
+  const handleLogoClick = () => {
+    if (user) {
+      navigate("/"); // If authenticated, go to home
+    } else {
+      navigate("/signin"); // If not authenticated, go to sign-in page
+    }
   };
 
   return (
-    <div className="bg-blue-700 text-white shadow-md">
-      <div className="flex items-center justify-between py-4 px-6">
-        <Link to="/home">
-          <h1 className="text-2xl font-bold">Ontario Health Maps</h1>
-        </Link>
+    <header className="sticky top-0 z-50 bg-[#2563EB] text-white shadow-md">
+      <div className="container mx-auto flex items-center justify-between h-16 px-4 md:px-6">
+        {/* Left Side: Logo & Title - Click redirects based on auth status */}
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={handleLogoClick}
+        >
+          <Map className="h-6 w-6 text-white" />
+          <h1 className="text-xl font-bold">Ontario Health Maps</h1>
+        </div>
 
-        <nav className="space-x-6">
-          {/* Show these links only if user is authenticated */}
+        {/* Right Side: Navigation Links */}
+        <nav className="flex items-center gap-4">
+          <Link to="/about" className="text-sm font-medium hover:underline">
+            About
+          </Link>
+          <Link to="/contact" className="text-sm font-medium hover:underline">
+            Contact
+          </Link>
+
           {user ? (
-            <>
-              <Link to="/about" className="hover:text-gray-300">
-                About
-              </Link>
-              <Link to="/contact" className="hover:text-gray-300">
-                Contact
-              </Link>
-              <button
-                onClick={handleSignOut}
-                className="text-red-300 font-semibold hover:text-red-500"
-              >
-                Sign Out
-              </button>
-            </>
+            <button
+              onClick={handleSignOut}
+              className="bg-white text-[#2563EB] px-3 py-1 rounded-md text-sm font-medium hover:bg-gray-200"
+            >
+              Sign Out
+            </button>
           ) : (
-            // Show Sign In only if user is NOT authenticated
-            <Link to="/signin" className="font-semibold hover:text-gray-300">
+            <Link
+              to="/signin"
+              className="bg-white text-[#2563EB] px-3 py-1 rounded-md text-sm font-medium hover:bg-gray-200"
+            >
               Sign In
             </Link>
           )}
         </nav>
       </div>
-    </div>
+    </header>
   );
 };
 
