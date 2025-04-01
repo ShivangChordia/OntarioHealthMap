@@ -274,7 +274,7 @@ const About = () => {
                       href="mailto:keval@ontariohealthmaps.ca"
                       className="text-blue-600 hover:underline"
                     >
-                      kpatel0000@conestogac.on.ca
+                      kpatel4341@conestogac.on.ca
                     </a>
                   </li>
                   <li>
@@ -284,7 +284,7 @@ const About = () => {
                       href="mailto:jaygiri@ontariohealthmaps.ca"
                       className="text-blue-600 hover:underline"
                     >
-                      jgoswami0000@conestogac.on.ca
+                      jgoswami6697@conestogac.on.ca
                     </a>
                   </li>
                 </ul>

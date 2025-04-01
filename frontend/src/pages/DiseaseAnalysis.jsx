@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import DiseaseIncidenceMortalityChart from "../components/DiseaseIncidenceMortalityChart";
-import DiseaseAgeGroupChart from "../components/DiseaseAgeGroupChart";
+import DiseaseAgeGroupChart from "../components/DIseaseAgeGroupChart";
 import OntarioCancerMap from "../components/OntarioCancermap";
 import { fetchDiseaseTrends } from "../utils/api";
 
