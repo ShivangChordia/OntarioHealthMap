@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import DiseaseIncidenceMortalityChart from "../components/DiseaseIncidenceMortalityChart";
 import DiseaseAgeGroupChart from "../components/DIseaseAgeGroupChart";
-import OntarioCancerMap from "../components/OntarioCancermap";
+import OntarioCancerMap from "../components/OntarioCancerMap";
 import { fetchDiseaseTrends } from "../utils/api";
 
 const DiseaseAnalysis = () => {
