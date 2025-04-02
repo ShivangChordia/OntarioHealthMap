@@ -26,7 +26,7 @@ const diseaseOptions = {
   Chronic: ["Diabetes", "Hypertension", "COPD", "Asthma"],
   Reproductive: ["HIV", "AIDS"],
   Respiratory: ["Influenza", "Tuberculosis", "Covid"],
-  Smoking: ["Daily Smoking", "Former Smoking"],
+  Smoking: ["Daily Smoking"],
 };
 
 const DiseaseAnalysis = () => {
@@ -82,6 +82,41 @@ const DiseaseAnalysis = () => {
         <Navbar />
         <div className="bg-gray-100 min-h-screen">
           <div className="container mx-auto px-6 pt-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+            {/* 🔙 Back Button */}
+            <button
+              onClick={() => navigate(-1)}
+              className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-md shadow-sm"
+            >
+              ← Back
+            </button>
+
+            {/* 🩺 Disease Selectors */}
+            <div className="flex gap-3">
+              <select
+                value={diseaseType}
+                onChange={(e) => {
+                  setDiseaseType(e.target.value);
+                  setSpecificType(diseaseOptions[e.target.value][0]); // Update default specific type
+                }}
+                className="px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
+              >
+                {Object.keys(diseaseOptions).map((type) => (
+                  <option key={type}>{type}</option>
+                ))}
+              </select>
+
+              <select
+                value={specificType}
+                onChange={(e) => setSpecificType(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white"
+              >
+                {diseaseOptions[diseaseType]?.map((specific) => (
+                  <option key={specific}>{specific}</option>
+                ))}
+              </select>
+            </div>
+          </div>
             <SmokingAnalysisPage smokingData={trendData} />
           </div>
         </div>
