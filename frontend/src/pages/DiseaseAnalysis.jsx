@@ -9,8 +9,9 @@ import OntarioChoroplethMap from "../components/OntarioChoroplethMap";
 import { fetchDiseaseTrends } from "../utils/api";
 import DiabetesHypertensionComparison from "../components/DiabetesHypertensionComparison";
 import SmokingAnalysisPage from "./SmokingAnalysisPage";
-import RadialDiseaseChart from "../components/RadialDiseaseChart";
 import BubbleMap from "../components/BubbleMap";
+import StackedBarByRegion from "../components/StackedBarByRegion";
+import TileHeatmap from "../components/TileHeatmap";
 
 const diseaseOptions = {
   Cancer: [
@@ -61,7 +62,7 @@ const DiseaseAnalysis = () => {
     const loadTrendData = async () => {
       setIsLoading(true);
       setError(null);
-
+console.log(trendData)
       try {
         const data = await fetchDiseaseTrends(diseaseType, specificType);
         setTrendData(data);
@@ -193,7 +194,8 @@ const DiseaseAnalysis = () => {
                 diseaseType={diseaseType}
                 specificType={specificType}
               />
-              <RadialDiseaseChart diseaseData={trendData} />
+              <StackedBarByRegion diseaseData={trendData} />
+              <TileHeatmap diseaseData={trendData} />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-hidden">
