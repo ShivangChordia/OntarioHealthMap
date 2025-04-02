@@ -4,7 +4,7 @@ import { Chart, registerables } from "chart.js";
 
 Chart.register(...registerables);
 
-const DiseaseIncidenceMortalityChart = ({ diseaseData }) => {
+const DiseaseIncidenceMortalityChart = ({ diseaseData, type }) => {
   const [chartData, setChartData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -18,7 +18,7 @@ const DiseaseIncidenceMortalityChart = ({ diseaseData }) => {
       setIsLoading(false);
       return;
     }
-
+  
     const years = [
       ...new Set([
         ...diseaseData.primary.map((d) => d.year),
@@ -26,28 +26,42 @@ const DiseaseIncidenceMortalityChart = ({ diseaseData }) => {
         ...(diseaseData.tertiary || []).map((d) => d.year),
       ]),
     ].sort();
-
-    const getRate = (year, genderFilter, dataset) => {
+  
+    const getRate = (year, measureFilter, dataset) => {
       const entry = dataset.find(
-        (d) => d.year === year && d.measure.includes(genderFilter)
+        (d) => d.year === year && d.measure.trim() === measureFilter
       );
       return entry ? entry.rate : null;
     };
-
-    setChartData({
-      labels: years,
-      datasets: [
+  
+    const lowerType = type?.toLowerCase() || "";
+    const isFemaleCancer = ["breast", "cervical"].includes(lowerType);
+    const isMaleCancer = ["prostate"].includes(lowerType);
+    const isSingleIncidenceMeasure = isFemaleCancer || isMaleCancer;
+  
+    const datasets = [];
+  
+    // Incidence (special case)
+    if (isSingleIncidenceMeasure) {
+      datasets.push({
+        label: "Incidence Rate",
+        data: years.map((year) =>
+          getRate(year, "Age-standardized rate", diseaseData.primary)
+        ),
+        borderColor: "#2563EB",
+        backgroundColor: "rgba(37, 99, 235, 0.2)",
+        tension: 0.4,
+        fill: true,
+      });
+    } else {
+      datasets.push(
         {
-          label: "Incidence Rate (Both Sexes)",
+          label: "Incidence Rate (Females)",
           data: years.map((year) =>
-            getRate(
-              year,
-              "Age-standardized rate (both sexes)",
-              diseaseData.primary
-            )
+            getRate(year, "Age-standardized rate (females)", diseaseData.primary)
           ),
-          borderColor: "#2563EB",
-          backgroundColor: "rgba(37, 99, 235, 0.2)",
+          borderColor: "#D97706",
+          backgroundColor: "rgba(217, 119, 6, 0.2)",
           tension: 0.4,
           fill: true,
         },
@@ -62,48 +76,26 @@ const DiseaseIncidenceMortalityChart = ({ diseaseData }) => {
           fill: true,
         },
         {
-          label: "Incidence Rate (Females)",
-          data: years.map((year) =>
-            getRate(
-              year,
-              "Age-standardized rate (females)",
-              diseaseData.primary
-            )
-          ),
-          borderColor: "#D97706",
-          backgroundColor: "rgba(217, 119, 6, 0.2)",
-          tension: 0.4,
-          fill: true,
-        },
-        {
-          label: "Mortality Rate (Both Sexes)",
+          label: "Incidence Rate (Both Sexes)",
           data: years.map((year) =>
             getRate(
               year,
               "Age-standardized rate (both sexes)",
-              diseaseData.secondary
+              diseaseData.primary
             )
           ),
-          borderColor: "#DC2626",
-          backgroundColor: "rgba(220, 38, 38, 0.2)",
+          borderColor: "#2563EB",
+          backgroundColor: "rgba(37, 99, 235, 0.2)",
           tension: 0.4,
           fill: true,
-        },
-        {
-          label: "Mortality Rate (Males)",
-          data: years.map((year) =>
-            getRate(
-              year,
-              "Age-standardized rate (males)",
-              diseaseData.secondary
-            )
-          ),
-          borderColor: "#7C3AED",
-          backgroundColor: "rgba(124, 58, 237, 0.2)",
-          tension: 0.4,
-          fill: true,
-        },
-        {
+        }
+      );
+    }
+  
+    // Mortality (gendered for all)
+    if (diseaseData.secondary?.length) {
+      if (!isMaleCancer) {
+        datasets.push({
           label: "Mortality Rate (Females)",
           data: years.map((year) =>
             getRate(
@@ -116,30 +108,70 @@ const DiseaseIncidenceMortalityChart = ({ diseaseData }) => {
           backgroundColor: "rgba(245, 158, 11, 0.2)",
           tension: 0.4,
           fill: true,
-        },
-        ...(diseaseData.tertiary?.length
-          ? [
-              {
-                label: "Prevalence Rate (Both Sexes)",
-                data: years.map((year) =>
-                  getRate(
-                    year,
-                    "Age-standardized rate (both sexes)",
-                    diseaseData.tertiary
-                  )
-                ),
-                borderColor: "#9333EA",
-                backgroundColor: "rgba(147, 51, 234, 0.2)",
-                tension: 0.4,
-                fill: true,
-              },
-            ]
-          : []),
-      ],
+        });
+      }
+  
+      if (!isFemaleCancer) {
+        datasets.push({
+          label: "Mortality Rate (Males)",
+          data: years.map((year) =>
+            getRate(
+              year,
+              "Age-standardized rate (males)",
+              diseaseData.secondary
+            )
+          ),
+          borderColor: "#7C3AED",
+          backgroundColor: "rgba(124, 58, 237, 0.2)",
+          tension: 0.4,
+          fill: true,
+        });
+      }
+  
+      if (!isMaleCancer && !isFemaleCancer) {
+        datasets.push({
+          label: "Mortality Rate (Both Sexes)",
+          data: years.map((year) =>
+            getRate(
+              year,
+              "Age-standardized rate (both sexes)",
+              diseaseData.secondary
+            )
+          ),
+          borderColor: "#DC2626",
+          backgroundColor: "rgba(220, 38, 38, 0.2)",
+          tension: 0.4,
+          fill: true,
+        });
+      }
+    }
+  
+    // Prevalence
+    if (diseaseData.tertiary?.length) {
+      datasets.push({
+        label: "Prevalence Rate (Both Sexes)",
+        data: years.map((year) =>
+          getRate(
+            year,
+            "Age-standardized rate (both sexes)",
+            diseaseData.tertiary
+          )
+        ),
+        borderColor: "#9333EA",
+        backgroundColor: "rgba(147, 51, 234, 0.2)",
+        tension: 0.4,
+        fill: true,
+      });
+    }
+  
+    setChartData({
+      labels: years,
+      datasets,
     });
-
+  
     setIsLoading(false);
-  }, [diseaseData]);
+  }, [diseaseData, type]);
+  
 
   return (
     <div className="bg-white p-6 shadow-md rounded-lg">

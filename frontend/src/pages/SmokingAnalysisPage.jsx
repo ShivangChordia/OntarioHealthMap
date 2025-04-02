@@ -47,7 +47,11 @@ const SmokingAnalysisPage = () => {
                 <OntarioChoroplethMap
                   diseaseData={smokingData}
                   title={`Smoking Incidence Map`}
-                  measureOptions={["Age-standardized rate (both sexes)"]}
+                  measureOptions={[
+                    "Age-standardized rate (both sexes)",
+                    "Age-standardized rate (males)",
+                    "Age-standardized rate (females)",
+                  ]}
                   dataKey="primary"
                 />
               </div>

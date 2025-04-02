@@ -42,14 +42,17 @@ const OntarioChoroplethMap = ({
     loadGeo();
   }, []);
 
-  // ✅ Normalize & map region names to rates
   const ratesByRegion = useMemo(() => {
     const regionRates = {};
+    console.log(selectedMeasure)
+
     diseaseData[dataKey]?.forEach((entry) => {
+      console.log("🗺️ Regions with data:", Object.keys(regionRates));
+
       const measureMatch =
         entry.measure &&
         entry.measure.toLowerCase().includes(selectedMeasure.toLowerCase());
-
+  
       if (measureMatch) {
         const region = entry.geography?.trim().toLowerCase();
         if (region) regionRates[region] = entry.rate;
@@ -57,6 +60,7 @@ const OntarioChoroplethMap = ({
     });
     return regionRates;
   }, [diseaseData, selectedMeasure, dataKey]);
+  
 
   // 🎨 Generate color bins dynamically
   useEffect(() => {
@@ -79,6 +83,8 @@ const OntarioChoroplethMap = ({
   const styleFeature = (feature) => {
     const name = feature.properties.NAME_ENG?.trim().toLowerCase();
     const rate = ratesByRegion[name];
+    console.log("📍 Map region:", name);
+
     return {
       fillColor: rate ? getColor(rate) : "#e0e0e0",
       weight: 1,

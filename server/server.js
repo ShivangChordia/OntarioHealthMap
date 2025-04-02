@@ -153,7 +153,9 @@ app.get("/api/cancer-data", async (req, res) => {
 
     let measureFilter = "Age-standardized rate (both sexes)"; // Default
 
-    if (age && !gender) {
+    if (type.toLowerCase() === "prostate","breast", "cervical") {
+      measureFilter = "Age-standardized rate";
+    } else if (age && !gender) {
       measureFilter = age;
     } else if (gender && !age) {
       measureFilter = gender;
@@ -525,6 +527,27 @@ app.get("/api/disease-trends", async (req, res) => {
           FROM ${primaryTable}
         `;
         break;
+      
+
+
+
+        case "Smoking":
+  primaryTable = "smoking_incidence";
+
+  const smokingTableExists = await pool.query(
+    `SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)`,
+    [primaryTable]
+  );
+
+  if (!smokingTableExists.rows[0].exists) {
+    return res.status(400).json({ error: "Smoking data table not found" });
+  }
+
+  primaryQuery = `
+    SELECT type, measure, year, ci, rate, geography
+    FROM ${primaryTable}
+  `;
+  break;
 
       default:
         return res.status(400).json({ error: "Invalid disease type" });

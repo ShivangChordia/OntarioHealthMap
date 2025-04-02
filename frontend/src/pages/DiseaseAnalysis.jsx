@@ -46,6 +46,15 @@ const DiseaseAnalysis = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const measureOptions = ["breast", "cervical", "prostate"].includes(specificType.toLowerCase())
+  ? ["Age-standardized rate"]
+  : [
+      "Age-standardized rate (both sexes)",
+      "Age-standardized rate (males)",
+      "Age-standardized rate (females)",
+    ];
+
+
   useEffect(() => {
     if (!diseaseType) return;
 
@@ -188,16 +197,13 @@ const DiseaseAnalysis = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-hidden">
-              <DiseaseIncidenceMortalityChart diseaseData={trendData} />
+              <DiseaseIncidenceMortalityChart diseaseData={trendData} type={specificType} />
               <DiseaseAgeGroupChart diseaseData={trendData} />
               <div className="col-span-full w-full max-w-full">
                 <OntarioChoroplethMap
                   diseaseData={trendData}
                   title={`${specificType} ${diseaseType} Incidence Map`}
-                  measureOptions={[
-                    "Age-standardized rate (males)",
-                    "Age-standardized rate (females)",
-                  ]}
+                  measureOptions={measureOptions}
                   dataKey="primary"
                 />
               </div>
