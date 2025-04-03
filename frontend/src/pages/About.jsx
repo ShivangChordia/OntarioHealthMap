@@ -375,7 +375,7 @@ const About = () => {
                   {/* Peter Mazdiak */}
                   <div>
                     <h4 className="font-semibold text-lg text-blue-700">
-                      Peter Mazdiak
+                      Prof. Peter Mazdiak
                     </h4>
                     <p className="text-gray-600 mb-2">Health Data Specialist</p>
                     <p className="text-gray-700 mb-2">

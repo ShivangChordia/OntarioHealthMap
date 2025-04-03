@@ -36,10 +36,10 @@ const DiseaseAgeGroupChart = ({ diseaseData }) => {
 
     const hasData = (ageGroup) => {
       const inPrimary = diseaseData.primary.some((d) =>
-        d.measure.includes(ageGroup)
+        d.measure?.includes(ageGroup)
       );
       const inSecondary = diseaseData.secondary.some((d) =>
-        d.measure.includes(ageGroup)
+        d.measure?.includes(ageGroup)
       );
       return inPrimary || inSecondary;
     };
@@ -48,7 +48,7 @@ const DiseaseAgeGroupChart = ({ diseaseData }) => {
 
     const getRate = (ageGroup, year, dataset) => {
       const entry = dataset.find(
-        (d) => d.year === year && d.measure.includes(ageGroup)
+        (d) => d.year === year && d.measure?.includes(ageGroup)
       );
       return entry ? entry.rate : null;
     };

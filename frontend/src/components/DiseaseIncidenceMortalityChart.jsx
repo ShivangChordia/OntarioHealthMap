@@ -29,7 +29,7 @@ const DiseaseIncidenceMortalityChart = ({ diseaseData, type }) => {
   
     const getRate = (year, measureFilter, dataset) => {
       const entry = dataset.find(
-        (d) => d.year === year && d.measure.trim() === measureFilter
+        (d) => d.year === year && d.measure?.trim() === measureFilter
       );
       return entry ? entry.rate : null;
     };
