@@ -1,3 +1,13 @@
+/*
+* File: Signin.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: Provides a sign-in form for users to log in using Firebase Authentication.
+*/
+
+
+
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebase";

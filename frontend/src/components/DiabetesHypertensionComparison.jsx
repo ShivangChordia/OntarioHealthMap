@@ -1,3 +1,15 @@
+/*
+* File: DiabetesHypertensionComparison.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: Displays side-by-side heatmaps for Diabetes and Hypertension trends (2013–2022), 
+*              comparing incidence, mortality, and prevalence for visual analysis of 
+*              chronic disease data.
+*/
+
+
+
 import React, { useEffect, useState } from "react";
 import { fetchDiseaseTrends } from "../utils/api";
 import * as d3 from "d3";

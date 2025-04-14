@@ -1,3 +1,14 @@
+/*
+* File: TermsOfService.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: Displays the Terms of Service, including 
+*              user responsibilities, data usage rules, and liability limitations.
+*/
+
+
+
 import React from "react";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";

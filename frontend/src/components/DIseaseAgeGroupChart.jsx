@@ -1,3 +1,14 @@
+/*
+* File: DIseaseAgeGroupChart.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: Renders a bar chart showing incidence and mortality rates across age groups 
+*              for a selected disease over multiple years.
+*/
+
+
+
 import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";

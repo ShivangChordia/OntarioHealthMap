@@ -1,3 +1,13 @@
+/*
+* File: About.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: This file represents the About page showcasing the platform's mission, key features, and the team behind it.
+*/
+
+
+
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 

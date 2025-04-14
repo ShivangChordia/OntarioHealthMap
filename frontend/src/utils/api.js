@@ -1,3 +1,14 @@
+/*
+* File: api.js
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: Includes API calls for disease trends, smoking data, 
+*              age/gender filters, PHU data, and GeoJSON boundaries.
+*/
+
+
+
 const API_BASE_URL = "https://ontario-health-map-backend.vercel.app";
 
 // Fetch GeoJSON data
@@ -46,6 +57,7 @@ export const fetchAvailableAgeGender = async (disease, type) => {
   }
 };
 
+
 // ✅ Fetch Disease Data (Cancer & Chronic)
 export const fetchDiseaseData = async ({
   disease,
@@ -57,8 +69,16 @@ export const fetchDiseaseData = async ({
   try {
     const queryParams = new URLSearchParams({ type, year });
 
-    if (age) queryParams.append("age", age);
-    if (!age && gender) queryParams.append("gender", gender);
+    if (age) {
+      queryParams.append("age", age);
+    }
+
+    const excludeGenderTypes = ["breast", "cervical", "prostate"];
+    const shouldIncludeGender = !age && gender && !excludeGenderTypes.includes(type.toLowerCase());
+
+    if (shouldIncludeGender) {
+      queryParams.append("gender", gender);
+    }
 
     const response = await fetch(
       `${API_BASE_URL}/api/${disease.toLowerCase()}-data?${queryParams.toString()}`
@@ -69,6 +89,7 @@ export const fetchDiseaseData = async ({
     return [];
   }
 };
+
 
 export const fetchDiseaseTrends = async (diseaseType, specificType) => {
   try {

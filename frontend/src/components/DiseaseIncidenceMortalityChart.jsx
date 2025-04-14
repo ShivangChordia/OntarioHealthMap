@@ -1,3 +1,15 @@
+/*
+* File: DiseaseIncidenceMortalityChart.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: Renders a dynamic line chart that visualizes the incidence, mortality, 
+*              and prevalence rates of various diseases over time, with gender-specific breakdowns 
+*              where applicable.
+*/
+
+
+
 import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";

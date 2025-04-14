@@ -1,3 +1,14 @@
+/*
+* File: BubbleMap.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: Renders an interactive Leaflet map showing Ontario regions with bubbles sized by population 
+*              and colored by disease incidence rates to highlight regional health trends.
+*/
+
+
+
 import React, { useEffect, useState } from "react";
 import {
   MapContainer,

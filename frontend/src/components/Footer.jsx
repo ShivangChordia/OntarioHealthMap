@@ -1,3 +1,14 @@
+/*
+* File: Footer.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: A footer component for the Ontario Health Maps project, providing sections 
+*              for the project resources, contact, data credibility, and copyright information.
+*/
+
+
+
 import { Link } from "react-router-dom";
 
 const Footer = () => {

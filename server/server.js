@@ -1,3 +1,13 @@
+/*
+* File: server.js
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: Express server providing APIs to fetch disease data from PostgreSQL.
+*/
+
+
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -155,7 +165,8 @@ app.get("/api/cancer-data", async (req, res) => {
 
     if (type.toLowerCase() === "prostate","breast", "cervical") {
       measureFilter = "Age-standardized rate";
-    } else if (age && !gender) {
+    }
+    if (age && !gender) {
       measureFilter = age;
     } else if (gender && !age) {
       measureFilter = gender;
@@ -172,6 +183,7 @@ app.get("/api/cancer-data", async (req, res) => {
 
     const result = await pool.query(query, values);
     res.json(result.rows);
+    
   } catch (err) {
     console.error("❌ Database Error:", err);
     res.status(500).json({ error: "Database error" });

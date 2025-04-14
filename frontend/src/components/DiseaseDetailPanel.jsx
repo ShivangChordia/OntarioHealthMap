@@ -1,3 +1,16 @@
+/*
+* File: DiseaseDetailPanel.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: Displays detailed statistics about a selected disease 
+*              for a specific Ontario region. It includes key metrics like incidence rate, 
+*              total cases, year, and demographic details, along with options to navigate 
+*              to a more in-depth analysis page or download the data as a CSV file.
+*/
+
+
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase"; // Import Firebase authentication

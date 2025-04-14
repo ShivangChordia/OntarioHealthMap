@@ -1,3 +1,14 @@
+/*
+* File: DiseaseChart.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: Renders a responsive line chart to visualize disease incidence or 
+*              mortality rates over time.
+*/
+
+
+
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 

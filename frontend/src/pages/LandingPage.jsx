@@ -1,3 +1,14 @@
+/*
+* File: LandingPage.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: The landing page providing an introduction to the platform and its services.
+*              Checks if the user is authenticated and redirects to the home page if logged in.
+*/
+
+
+
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";

@@ -1,3 +1,13 @@
+/*
+* File: Home.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: The home page where users can view and interact with disease-related data.
+*/
+
+
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
@@ -97,7 +107,9 @@ const Home = () => {
       fetchAvailableAgeGender(selectedCategory, selectedDisease)
         .then(({ ageFilters, genderFilters }) => {
           setFilters((prev) => ({
-            ...prev,
+            year: "",
+      age: "",
+      gender: "",
             availableAges: ageFilters || [],
             availableGenders: genderFilters || [],
           }));

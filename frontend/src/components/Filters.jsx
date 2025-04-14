@@ -1,3 +1,14 @@
+/*
+* File: Filters.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: Manages the filters for year, age, and gender based on selected disease and type,
+*              fetching available filter options and updating the filter state accordingly.
+*/
+
+
+
 import React, { useEffect, useState } from "react";
 import { fetchAvailableYears, fetchAvailableAgeGender } from "../utils/api";
 

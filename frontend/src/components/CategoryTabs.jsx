@@ -1,3 +1,13 @@
+/*
+* File: CategoryTabs.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: Displays selectable category tabs for filtering disease data.
+*/
+
+
+
 import React from "react";
 
 const CategoryTabs = ({ selectedCategory, setSelectedCategory }) => {

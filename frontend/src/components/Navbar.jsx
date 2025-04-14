@@ -1,3 +1,15 @@
+/*
+* File: Navbar.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: Provides links to different pages such as About, Contact, and 
+*              Sign Out functionality.
+*/
+
+
+
+
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Map, Search } from "lucide-react";

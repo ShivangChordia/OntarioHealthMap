@@ -1,3 +1,14 @@
+/*
+* File: StackedBarByRegion.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: A stacked bar chart component that visualizes disease incidence by region.
+*/
+
+
+
+
 import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";

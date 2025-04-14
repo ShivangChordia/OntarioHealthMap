@@ -1,3 +1,14 @@
+/*
+* File: PrivacyPolicy.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: This component displays the Privacy Policy page, it outlines how 
+*              personal and usage data is collected, used, and protected.
+*/
+
+
+
 import React from "react";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";

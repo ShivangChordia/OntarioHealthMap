@@ -1,3 +1,13 @@
+/*
+* File: OntarioChoroplethMap.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: A choropleth map for visualizing disease incidence or mortality rates. 
+*/
+
+
+
 import React, { useEffect, useState, useMemo } from "react";
 import {
   MapContainer,

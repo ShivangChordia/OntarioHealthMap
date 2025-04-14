@@ -1,3 +1,13 @@
+/*
+* File: ContactPage.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: Handles the contact form, allowing users to send messages to the support team.
+*/
+
+
+
 import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";

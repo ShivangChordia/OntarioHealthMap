@@ -1,3 +1,14 @@
+/*
+* File: SmokingDiseaseComparisonChart.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: A chart component that compares smoking rates and the incidence 
+*              of a specific disease over time.
+*/
+
+
+
 import React, { useEffect, useState } from "react";
 import {
   Chart as ChartJS,

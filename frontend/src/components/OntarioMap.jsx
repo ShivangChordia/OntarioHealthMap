@@ -1,3 +1,13 @@
+/*
+* File: OntarioMap.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: A map component to display the boundaries of Ontario’s Public Health Units (PHUs).
+*/
+
+
+
 import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";

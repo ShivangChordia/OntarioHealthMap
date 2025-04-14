@@ -1,3 +1,14 @@
+/*
+* File: SmokingTrendsChart.jsx
+* Project: OntarioHealthMap
+* Programmers: Shivang Chordia, Urvish Motivaras, Keval Patel, Jaygiri Goswami
+* Date: 13-04-2025
+* Description: A line chart component that visualizes smoking trends over time, 
+*              comparing daily smoking rates with former smoking rates.
+*/
+
+
+
 import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
